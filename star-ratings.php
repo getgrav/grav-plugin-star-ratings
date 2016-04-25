@@ -55,12 +55,13 @@ class StarRatingsPlugin extends Plugin
     {
         if ($this->config->get('plugins.star-ratings.built_in_css')) {
             $this->grav['assets']
-                ->addCss('plugin://star-ratings/css/star-ratings.css');
+                ->addCss('plugin://star-ratings/assets/star-ratings.css');
         }
 
         $this->grav['assets']
             ->add('jquery', 101)
-            ->addJs('plugin://star-ratings/js/jquery.star-rating-svg.min.js');
+            ->addJs('plugin://star-ratings/assets/jquery.star-rating-svg.min.js')
+            ->addJs('plugin://star-ratings/assets/star-ratings.js');
     }
 
     public function generateStars($id, $num_stars=5, $star_width=16)
