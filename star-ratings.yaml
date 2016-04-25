@@ -1,0 +1,4 @@
+enabled: true
+built_in_css: true
+minimum_stars: 0
+deny_repeats: true
