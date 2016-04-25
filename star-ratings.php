@@ -47,9 +47,10 @@ class StarRatingsPlugin extends Plugin
 
     public function vote() 
     {
-        $rating = $_POST['rating'];
+        $rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT);
+        $id     = filter_input(INPUT_POST, 'id',     FILTER_SANITIZE_STRING);
 
-        error_log('Rating: ' . $rating);
+        error_log('Id: ' . $id .', rating: ' . $rating);
 
         exit();
     }
