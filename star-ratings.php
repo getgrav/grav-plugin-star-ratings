@@ -25,13 +25,7 @@ class StarRatingsPlugin extends Plugin
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0],
             'onPagesInitialized'   => ['onPagesInitialized', 0],
-            'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
         ];
-    }
-
-    public function onTwigTemplatePaths()
-    {
-        $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
     }
 
 
@@ -92,8 +86,11 @@ class StarRatingsPlugin extends Plugin
             ->addJs('plugin://star-ratings/assets/star-ratings.js');
     }
 
-    public function generateStars($id, $num_stars=5, $star_width=16)
+    public function generateStars($id=null, $num_stars=5, $star_width=16)
     {
-
+        if ($id === null) {
+            return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
+        }
+        return '<div class="star-rating-container" data-id="'.$id.'"></div>';
     }
 }
