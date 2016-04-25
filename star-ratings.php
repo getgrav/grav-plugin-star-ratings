@@ -23,8 +23,14 @@ class StarRatingsPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onPluginsInitialized' => ['onPluginsInitialized', 0]
+            'onPluginsInitialized' => ['onPluginsInitialized', 0],
+            'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
         ];
+    }
+
+    public function onTwigTemplatePaths()
+    {
+        $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
     }
 
     /**
