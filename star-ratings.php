@@ -24,6 +24,7 @@ class StarRatingsPlugin extends Plugin
     {
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0],
+            'onPagesInitialized'   => ['onPagesInitialized', 0],
             'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
         ];
     }
@@ -31,6 +32,26 @@ class StarRatingsPlugin extends Plugin
     public function onTwigTemplatePaths()
     {
         $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
+    }
+
+
+    public function onPagesInitialized()
+    {
+        $uri = $this->grav['uri'];
+        if (strpos($uri->path(), '/star_rating') === false) {
+            return;
+        }
+        
+        $this->vote();
+    }
+
+    public function vote() 
+    {
+        $rating = $_POST['rating'];
+
+        error_log('Rating: ' . $rating);
+
+        exit();
     }
 
     /**
