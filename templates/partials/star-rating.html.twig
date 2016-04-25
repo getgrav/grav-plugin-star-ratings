@@ -1,0 +1,22 @@
+{% if not id %}
+	Star item ID not specified. Exiting
+{% else %}
+	<script>
+	$(function() {
+		$('.star-rating-{{id}}').starRating({
+		    starSize: 25,
+		    callback: function(currentRating, $el) {
+		        $.post('/star_rating', { rating: currentRating })
+		         .done(function() {
+		         	console.log('success');
+		         })
+		         .fail(function() {
+		         	console.log('fail');
+		         });
+		    }
+		});
+	});
+	</script>
+
+	<div class="star-rating-{{id}}"></div>
+{% endif %}
