@@ -74,7 +74,7 @@ class StarRatingsPlugin extends Plugin
         $id          = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_STRING);
 
         // check for duplicate vote if configured
-        if ($this->config->get('plugins.star-ratings.ip_restriction')) {
+        if ($this->config->get('plugins.star-ratings.deny_repeats')) {
             if (!$this->validateIp($id)) {
                 return [false, 'This IP has already voted'];
             }
