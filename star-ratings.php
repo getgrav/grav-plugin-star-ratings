@@ -152,7 +152,7 @@ class StarRatingsPlugin extends Plugin
 
     }
 
-    public function generateStars($id=null, $num_stars=5, $star_width=16)
+    public function generateStars($id=null, $options = [])
     {
         if ($id === null) {
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
@@ -162,10 +162,28 @@ class StarRatingsPlugin extends Plugin
 
         $data = [
             'id' => $id,
-            'stars' => $this->getStars($id),
-            'total' => $this->config->get('plugins.star-ratings.total_stars'),
-            'uri' => $this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json'
+            'uri' => $this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json',
+            'options' => [
+                'totalStars' => $this->config->get('plugins.star-ratings.total_stars', 5),
+                'initialRating' => $this->getStars($id),
+                'starSize' => $this->config->get('plugins.star-ratings.star_size', 25),
+                'useFullStars' => $this->config->get('plugins.star-ratings.use_full_stars', false),
+                'emptyColor' => $this->config->get('plugins.star-ratings.empty_color', 'lightgray'),
+                'hoverColor' => $this->config->get('plugins.star-ratings.hover_color', 'orange'),
+                'activeColor' => $this->config->get('plugins.star-ratings.active_color', 'gold'),
+                'useGradient' => $this->config->get('plugins.star-ratings.use_gradient', true),
+                'starGradient' => [
+                    'start' => $this->config->get('plugins.star-ratings.start_gradient_start', '#fef7cd'),
+                    'end' => $this->config->get('plugins.star-ratings.start_gradient_end', '#ff9511')
+                ],
+                'readOnly' => $this->config->get('plugins.star-ratings.readonly', false),
+                'disableAfterRate' => $this->config->get('plugins.star-ratings.disable_after_rate', true),
+                'strokeWidth' => $this->config->get('plugins.star-ratings.stroke_width', 0),
+                'strokeColor' => $this->config->get('plugins.star-ratings.stroke_color', 'black')
+            ]
         ];
+
+        $data['options'] = array_replace_recursive($data['options'], $options);
 
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
 
