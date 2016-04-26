@@ -15,9 +15,13 @@ class StarRatingsPlugin extends Plugin
     protected $total_stars;
     protected $only_full_stars;
 
+    protected $stars_data_path;
+    protected $ips_data_path;
+
     protected $vote_data;
 
-    protected $cache_id;
+    protected $stars_cache_id;
+    protected $ips_cache_id;
 
     /**
      * @return array
@@ -47,15 +51,20 @@ class StarRatingsPlugin extends Plugin
         $this->total_stars = $this->config->get('plugins.star-ratings.total_stars');
         $this->only_full_stars = $this->config->get('plugins.star-ratings.only_full_stars');
 
-        $this->cache_id = md5('vote-data'.$cache->getKey());
+        $data_path = $this->grav['locator']->findResource('user://data', true) . '/star-ratings/';
+        $this->stars_data_path = $data_path . 'stars.yaml';
+        $this->ips_data_path =$data_path . 'ips.yaml';
+
+        $this->stars_cache_id = md5('stars-vote-data'.$cache->getKey());
+        $this->ips_cache_id = md5('stars-ip-data'.$cache->getKey());
 
         if ($this->callback != $uri->path()) {
             return;
         }
         
-        $this->addVote();
+        $result = $this->addVote();
 
-        echo json_encode(['status' => 'success']);
+        echo json_encode(['status' => $result[0], 'message' => $result[1]]);
         exit();
     }
 
@@ -63,6 +72,13 @@ class StarRatingsPlugin extends Plugin
     {
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $id          = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_STRING);
+
+        // check for duplicate vote if configured
+        if ($this->config->get('plugins.star-ratings.ip_restriction')) {
+            if (!$this->validateIp($id)) {
+                return [false, 'This IP has already voted'];
+            }
+        }
 
         // sanity checks for star ratings
         if ($star_rating < 0) {
@@ -91,6 +107,8 @@ class StarRatingsPlugin extends Plugin
         }
 
         $this->saveVoteData($id, $rating);
+
+        return [true, 'Your vote has been added!'];
     }
 
     /**
@@ -169,11 +187,10 @@ class StarRatingsPlugin extends Plugin
     {
         if (empty($this->vote_data)) {
             $cache = $this->grav['cache'];
-            $vote_data = $cache->fetch($this->cache_id);
+            $vote_data = $cache->fetch($this->stars_cache_id);
 
             if ($vote_data === false) {
-                $path = $this->grav['locator']->findResource('user://data', true) . '/star-ratings/star-ratings.yaml';
-                $fileInstance = File::instance($path);
+                $fileInstance = File::instance($this->stars_data_path);
 
                 if (!$fileInstance->content()) {
                     $vote_data = [];
@@ -184,7 +201,7 @@ class StarRatingsPlugin extends Plugin
                 $this->vote_data = $vote_data;
 
                 // store data in cache
-                $cache->save($this->cache_id, $this->vote_data);
+                $cache->save($this->stars_cache_id, $this->vote_data);
             }
         }
         return $this->vote_data;
@@ -197,11 +214,10 @@ class StarRatingsPlugin extends Plugin
         }
 
         // update data in cache
-        $this->grav['cache']->save($this->cache_id, $this->vote_data);
+        $this->grav['cache']->save($this->stars_cache_id, $this->vote_data);
 
         // save in file
-        $path = $this->grav['locator']->findResource('user://data', true) . '/star-ratings/star-ratings.yaml';
-        $fileInstance = File::instance($path);
+        $fileInstance = File::instance($this->stars_data_path);
         $yaml = Yaml::dump($this->vote_data);
         $fileInstance->content($yaml);
         $fileInstance->save();
@@ -215,6 +231,38 @@ class StarRatingsPlugin extends Plugin
         } else {
             return 0;
         }
+    }
+
+    private function validateIp($id)
+    {
+        $user_ip = $this->grav['uri']->ip();
+        $fileInstance = File::instance($this->ips_data_path);
+
+        if (!$fileInstance->content()) {
+            $ip_data = [];
+        } else {
+            $ip_data = Yaml::parse($fileInstance->content());
+        }
+
+        if (array_key_exists($user_ip, $ip_data)) {
+            $user_ip_data = $ip_data[$user_ip];
+            if (in_array($id, $user_ip_data)) {
+                return false;
+            }  else {
+                array_push($user_ip_data, $id);
+            }
+        } else {
+            $user_ip_data = [$id];
+        }
+
+        $ip_data[$user_ip] = $user_ip_data;
+
+        $yaml = Yaml::dump($ip_data);
+        $fileInstance->content($yaml);
+        $fileInstance->save();
+
+        return true;
+
     }
 
 }
