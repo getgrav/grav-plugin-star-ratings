@@ -1,4 +1,7 @@
 enabled: true
+callback: '/star-ratings'
 built_in_css: true
 minimum_stars: 0
+total_stars: 5
+only_full_stars: true
 deny_repeats: true
