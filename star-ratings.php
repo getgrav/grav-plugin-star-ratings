@@ -2,6 +2,8 @@
 namespace Grav\Plugin;
 
 use Grav\Common\Plugin;
+use Grav\Common\Uri;
+use Grav\Common\Utils;
 use RocketTheme\Toolbox\File\File;
 use Symfony\Component\Yaml\Yaml;
 
@@ -70,8 +72,18 @@ class StarRatingsPlugin extends Plugin
 
     public function addVote()
     {
+        $nonce = $this->grav['uri']->param('nonce');
+        if (!Utils::verifyNonce($nonce, 'star-ratings')) {
+            return [false, 'Invalid security nonce'];
+        }
+
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $id          = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_STRING);
+
+        // ensure both values are sent
+        if (is_null($star_rating) || is_null($id)) {
+            return [false, 'missing either id or rating'];
+        }
 
         // check for duplicate vote if configured
         if ($this->config->get('plugins.star-ratings.deny_repeats')) {
@@ -162,7 +174,7 @@ class StarRatingsPlugin extends Plugin
 
         $data = [
             'id' => $id,
-            'uri' => $this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json',
+            'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json','star-ratings'),
             'options' => [
                 'totalStars' => $this->config->get('plugins.star-ratings.total_stars', 5),
                 'initialRating' => $this->getStars($id),
