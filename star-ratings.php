@@ -43,6 +43,14 @@ class StarRatingsPlugin extends Plugin
         ];
     }
 
+    /**
+     * Add templates directory to twig lookup paths.
+     */
+    public function onTwigTemplatePaths()
+    {
+        $this->grav['twig']->twig_paths[] = __DIR__ . '/admin/templates';
+    }
+
 
     public function onPagesInitialized()
     {
@@ -130,6 +138,9 @@ class StarRatingsPlugin extends Plugin
     {
         // Don't proceed if we are in the admin plugin
         if ($this->isAdmin()) {
+            $this->enable([
+                'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0]
+            ]);
             return;
         }
 
