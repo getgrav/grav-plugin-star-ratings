@@ -61,7 +61,7 @@ class StarRatingsPlugin extends Plugin
         if ($this->callback != $uri->path()) {
             return;
         }
-        
+
         $result = $this->addVote();
 
         echo json_encode(['status' => $result[0], 'message' => $result[1]]);
@@ -144,33 +144,10 @@ class StarRatingsPlugin extends Plugin
                 ->addCss('plugin://star-ratings/assets/star-ratings.css');
         }
 
-        $callback_url = $this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json';
-        $total_stars = $this->config->get('plugins.star-ratings.total_stars');
-
-        $inline_js = "$(function() {
-                        $('.star-rating-container').starRating({
-                            starSize: 25,
-                            totalStars: ".$total_stars.",
-                            disableAfterRate: false,
-                            initialRating: $('.star-rating-container').data('stars'),
-                            callback: function(currentRating, \$el) {
-                                var id = \$el.closest('.star-rating-container').data('id');
-                                $.post('".$callback_url."', { id: id, rating: currentRating })
-                                 .done(function() {
-                                    console.log('success');
-                                 })
-                                 .fail(function() {
-                                    console.log('fail');
-                                 });
-                            }
-                        });
-                    });";
-
         $this->grav['assets']
             ->add('jquery', 101)
             ->addJs('plugin://star-ratings/assets/jquery.star-rating-svg.min.js')
-            ->addJs('plugin://star-ratings/assets/star-ratings.js')
-            ->addInlineJs($inline_js);
+            ->addJs('plugin://star-ratings/assets/star-ratings.js');
 
 
     }
@@ -180,7 +157,19 @@ class StarRatingsPlugin extends Plugin
         if ($id === null) {
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
         }
-        return '<div class="star-rating-container" data-id="'.$id.'" data-stars="'.$this->getStars($id).'"></div>';
+
+        $total_stars = $this->config->get('plugins.star-ratings.total_stars');
+
+        $data = [
+            'id' => $id,
+            'stars' => $this->getStars($id),
+            'total' => $this->config->get('plugins.star-ratings.total_stars'),
+            'uri' => $this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json'
+        ];
+
+        $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
+
+        return '<div class="star-rating-container" data-star-rating="'.$data.'"></div>';
     }
 
     private function getVoteData()
