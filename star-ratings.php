@@ -187,22 +187,22 @@ class StarRatingsPlugin extends Plugin
             'id' => $id,
             'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json','star-ratings'),
             'options' => [
-                'totalStars' => $this->config->get('plugins.star-ratings.total_stars', 5),
+                'totalStars' => $this->config->get('plugins.star-ratings.total_stars'),
                 'initialRating' => $this->getStars($id),
-                'starSize' => $this->config->get('plugins.star-ratings.star_size', 25),
-                'useFullStars' => $this->config->get('plugins.star-ratings.use_full_stars', false),
-                'emptyColor' => $this->config->get('plugins.star-ratings.empty_color', 'lightgray'),
-                'hoverColor' => $this->config->get('plugins.star-ratings.hover_color', 'orange'),
-                'activeColor' => $this->config->get('plugins.star-ratings.active_color', 'gold'),
-                'useGradient' => $this->config->get('plugins.star-ratings.use_gradient', true),
+                'starSize' => $this->config->get('plugins.star-ratings.star_size'),
+                'useFullStars' => $this->config->get('plugins.star-ratings.use_full_stars'),
+                'emptyColor' => $this->config->get('plugins.star-ratings.empty_color'),
+                'hoverColor' => $this->config->get('plugins.star-ratings.hover_color'),
+                'activeColor' => $this->config->get('plugins.star-ratings.active_color'),
+                'useGradient' => $this->config->get('plugins.star-ratings.use_gradient'),
                 'starGradient' => [
-                    'start' => $this->config->get('plugins.star-ratings.start_gradient_start', '#fef7cd'),
-                    'end' => $this->config->get('plugins.star-ratings.start_gradient_end', '#ff9511')
+                    'start' => $this->config->get('plugins.star-ratings.star_gradient_start'),
+                    'end' => $this->config->get('plugins.star-ratings.star_gradient_end')
                 ],
-                'readOnly' => $this->config->get('plugins.star-ratings.readonly', false),
-                'disableAfterRate' => $this->config->get('plugins.star-ratings.disable_after_rate', true),
-                'strokeWidth' => $this->config->get('plugins.star-ratings.stroke_width', 0),
-                'strokeColor' => $this->config->get('plugins.star-ratings.stroke_color', 'black')
+                'readOnly' => $this->config->get('plugins.star-ratings.readonly'),
+                'disableAfterRate' => $this->config->get('plugins.star-ratings.disable_after_rate'),
+                'strokeWidth' => $this->config->get('plugins.star-ratings.stroke_width'),
+                'strokeColor' => $this->config->get('plugins.star-ratings.stroke_color')
             ]
         ];
 

@@ -1,7 +1,7 @@
 name: Star Ratings
 version: 0.1.0
 description: Simple but Powerful Star Ratings plugin for anything!
-icon: plug
+icon: star-half-o
 author:
   name: Team Grav
   email: devs@getgrav.org
@@ -25,7 +25,111 @@ form:
         0: Disabled
       validate:
         type: bool
-    text_var:
+
+    callback:
       type: text
-      label: Text Variable
-      help: Text to add to the top of a page
+      size: medium
+      label: Callback URL
+      help: A path that the plugin will look for when processing Ajax calls
+
+    total_stars:
+      type: select
+      size: x-small
+      label: Total stars
+      classes: fancy
+      help: The number of stars to display by default
+      default: 5
+      options:
+          3: '3'
+          4: '4'
+          5: '5'
+          6: '6'
+          7: '7'
+          8: '8'
+          9: '9'
+          10: '10'
+
+    star_size:
+      type: text
+      size: x-small
+      label: Star size
+      help: The size in pixels fo the stars
+
+    use_full_stars:
+      type: toggle
+      label: Use full stars
+      highlight: 0
+      help: With this enabled you will not be able to vote for half star values
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
+
+    empty_color:
+      type: colorpicker
+      size: medium
+      label: Empty color
+
+    hover_color:
+      type: colorpicker
+      size: medium
+      label: Hover color
+
+    active_color:
+      type: colorpicker
+      size: medium
+      label: Active color
+
+    use_gradient:
+      type: toggle
+      label: Use gradient
+      highlight: 1
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
+
+    star_gradient_start:
+      type: colorpicker
+      size: medium
+      label: Start gradient color
+
+    star_gradient_end:
+      type: colorpicker
+      size: medium
+      label: End gradient color
+
+    stroke_width:
+      type: text
+      size: x-small
+      label: Stroke width
+      help: The width of the surrounding stroke
+
+    stroke_color:
+      type: colorpicker
+      size: medium
+      label: End gradient color
+
+    readonly:
+      type: toggle
+      label: Read-only
+      help: Set to readonly to disable all interaction
+      highlight: 0
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
+
+    disable_after_rate:
+      type: toggle
+      label: Disable after rate
+      help: Disables interaction after the user has already made a star selection
+      highlight: 1
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
