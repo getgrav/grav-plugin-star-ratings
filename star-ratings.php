@@ -57,6 +57,14 @@ class StarRatingsPlugin extends Plugin
         $uri = $this->grav['uri'];
         $cache = $this->grav['cache'];
 
+        // if not in admin merge potential page-level configs
+        if ($this->isAdmin()) {
+            $page = $this->grav['page'];
+            if ($page) {
+                $this->config->set('plugins.star-ratings', $this->mergeConfig($page));
+            }
+        }
+
         $this->callback = $this->config->get('plugins.star-ratings.callback');
         $this->total_stars = $this->config->get('plugins.star-ratings.total_stars');
         $this->only_full_stars = $this->config->get('plugins.star-ratings.only_full_stars');
