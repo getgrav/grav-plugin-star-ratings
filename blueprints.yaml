@@ -32,6 +32,36 @@ form:
       label: Callback URL
       help: A path that the plugin will look for when processing Ajax calls
 
+    built_in_css:
+      type: toggle
+      label: Enable built-in CSS
+      highlight: 1
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
+
+    unique_ip_check:
+      type: toggle
+      label: Unique IP Check
+      highlight: 1
+      help: Ensures that a particular IP can only vote once
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
+
+    initial_stars:
+      type: text
+      size: x-small
+      label: Initial stars
+      help: You can populate the stars with an initial number when there are no votes
+      validate:
+        type: number
+        min: 0
+
     total_stars:
       type: select
       size: x-small
@@ -54,6 +84,9 @@ form:
       size: x-small
       label: Star size
       help: The size in pixels fo the stars
+      validate:
+        type: number
+        min: 5
 
     use_full_stars:
       type: toggle
@@ -106,6 +139,9 @@ form:
       size: x-small
       label: Stroke width
       help: The width of the surrounding stroke
+      validate:
+        type: number
+        min: 0
 
     stroke_color:
       type: colorpicker

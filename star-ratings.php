@@ -5,7 +5,7 @@ use Grav\Common\Plugin;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
 use RocketTheme\Toolbox\File\File;
-use Symfony\Component\Yaml\Yaml;
+
 
 /**
  * Class StarRatingsPlugin
@@ -44,37 +44,53 @@ class StarRatingsPlugin extends Plugin
     }
 
     /**
-     * Add templates directory to twig lookup paths.
+     * Initialize the plugin
      */
-    public function onTwigTemplatePaths()
+    public function onPluginsInitialized()
     {
-        $this->grav['twig']->twig_paths[] = __DIR__ . '/admin/templates';
-    }
+        // Don't proceed if we are in the admin plugin
+        if ($this->isAdmin()) {
+            $this->enable([
+                'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0]
+            ]);
+            return;
+        }
 
+        // Enable the main event we are interested in
+        $this->enable([
+            'onTwigInitialized' => ['onTwigInitialized', 0],
+            'onTwigSiteVariables' => ['onTwigSiteVariables', 0],
+        ]);
+
+    }
 
     public function onPagesInitialized()
     {
         $uri = $this->grav['uri'];
-        $cache = $this->grav['cache'];
 
         // if not in admin merge potential page-level configs
-        if ($this->isAdmin()) {
+        if (!$this->isAdmin()) {
             $page = $this->grav['page'];
             if ($page) {
                 $this->config->set('plugins.star-ratings', $this->mergeConfig($page));
             }
         }
 
+        $cache = $this->grav['cache'];
+
+        $data_path = $this->grav['locator']->findResource('user://data', true) . '/star-ratings/';
+        $this->stars_data_path = $data_path . 'stars.json';
+        $this->ips_data_path =$data_path . 'ips.json';
+
+        $this->stars_cache_id = md5('stars-vote-data'.$cache->getKey());
+        $this->ips_cache_id = md5('stars-ip-data'.$cache->getKey());
+
+        $this->getVoteData();
+
         $this->callback = $this->config->get('plugins.star-ratings.callback');
         $this->total_stars = $this->config->get('plugins.star-ratings.total_stars');
         $this->only_full_stars = $this->config->get('plugins.star-ratings.only_full_stars');
 
-        $data_path = $this->grav['locator']->findResource('user://data', true) . '/star-ratings/';
-        $this->stars_data_path = $data_path . 'stars.yaml';
-        $this->ips_data_path =$data_path . 'ips.yaml';
-
-        $this->stars_cache_id = md5('stars-vote-data'.$cache->getKey());
-        $this->ips_cache_id = md5('stars-ip-data'.$cache->getKey());
 
         if ($this->callback != $uri->path()) {
             return;
@@ -102,7 +118,7 @@ class StarRatingsPlugin extends Plugin
         }
 
         // check for duplicate vote if configured
-        if ($this->config->get('plugins.star-ratings.deny_repeats')) {
+        if ($this->config->get('plugins.star-ratings.unique_ip_check')) {
             if (!$this->validateIp($id)) {
                 return [false, 'This IP has already voted'];
             }
@@ -124,14 +140,9 @@ class StarRatingsPlugin extends Plugin
 
         if (array_key_exists($id, $vote_data)) {
             $rating = $vote_data[$id];
-            $rating['count']++;
-            array_push($rating['votes'], $star_rating);
-            $rating['score'] = array_sum($rating['votes']) / $rating['count'];
-
+            array_push($rating, $star_rating);
         } else {
-            $rating['count'] = 1;
-            $rating['votes'] = [$star_rating];
-            $rating['score'] = $star_rating;
+            $rating = [$star_rating];
         }
 
         $this->saveVoteData($id, $rating);
@@ -140,27 +151,16 @@ class StarRatingsPlugin extends Plugin
     }
 
     /**
-     * Initialize the plugin
+     * Add templates directory to twig lookup paths.
      */
-    public function onPluginsInitialized()
+    public function onTwigTemplatePaths()
     {
-        // Don't proceed if we are in the admin plugin
-        if ($this->isAdmin()) {
-            $this->enable([
-                'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0]
-            ]);
-            return;
-        }
-
-        // Enable the main event we are interested in
-        $this->enable([
-            'onTwigInitialized' => ['onTwigInitialized', 0],
-            'onTwigSiteVariables' => ['onTwigSiteVariables', 0],
-        ]);
-
-        $this->getVoteData();
+        $this->grav['twig']->twig_paths[] = __DIR__ . '/admin/templates';
     }
 
+    /**
+     * Add simple `stars()` Twig function
+     */
     public function onTwigInitialized()
     {
         $this->grav['twig']->twig()->addFunction(
@@ -168,6 +168,9 @@ class StarRatingsPlugin extends Plugin
         );
     }
 
+    /**
+     * Add CSS and JS to page header
+     */
     public function onTwigSiteVariables()
     {
         if ($this->config->get('plugins.star-ratings.built_in_css')) {
@@ -183,13 +186,18 @@ class StarRatingsPlugin extends Plugin
 
     }
 
+    /**
+     * Used by the Twig function to generate stars
+     *
+     * @param null $id
+     * @param array $options
+     * @return string
+     */
     public function generateStars($id=null, $options = [])
     {
         if ($id === null) {
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
         }
-
-        $total_stars = $this->config->get('plugins.star-ratings.total_stars');
 
         $data = [
             'id' => $id,
@@ -223,7 +231,7 @@ class StarRatingsPlugin extends Plugin
 
     private function getVoteData()
     {
-        if (empty($this->vote_data)) {
+        if (is_null($this->vote_data)) {
             $cache = $this->grav['cache'];
             $vote_data = $cache->fetch($this->stars_cache_id);
 
@@ -233,7 +241,7 @@ class StarRatingsPlugin extends Plugin
                 if (!$fileInstance->content()) {
                     $vote_data = [];
                 } else {
-                    $vote_data = Yaml::parse($fileInstance->content());
+                    $vote_data = json_decode($fileInstance->content(), true);
                 }
                 // store data in plugin
                 $this->vote_data = $vote_data;
@@ -256,8 +264,8 @@ class StarRatingsPlugin extends Plugin
 
         // save in file
         $fileInstance = File::instance($this->stars_data_path);
-        $yaml = Yaml::dump($this->vote_data);
-        $fileInstance->content($yaml);
+        $data = json_encode((array)$this->vote_data);
+        $fileInstance->content($data);
         $fileInstance->save();
     }
 
@@ -265,7 +273,10 @@ class StarRatingsPlugin extends Plugin
     {
         $vote_data = $this->getVoteData();
         if (array_key_exists($id, $vote_data)) {
-            return $vote_data[$id]['score'];
+            $votes = $vote_data[$id];
+            $count = count($votes);
+            $score = array_sum($votes) / $count;
+            return $score;
         } else {
             return 0;
         }
@@ -279,7 +290,7 @@ class StarRatingsPlugin extends Plugin
         if (!$fileInstance->content()) {
             $ip_data = [];
         } else {
-            $ip_data = Yaml::parse($fileInstance->content());
+            $ip_data = json_decode($fileInstance->content(), true);
         }
 
         if (array_key_exists($user_ip, $ip_data)) {
@@ -295,8 +306,8 @@ class StarRatingsPlugin extends Plugin
 
         $ip_data[$user_ip] = $user_ip_data;
 
-        $yaml = Yaml::dump($ip_data);
-        $fileInstance->content($yaml);
+        $data = json_encode((array)$ip_data);
+        $fileInstance->content($data);
         $fileInstance->save();
 
         return true;
