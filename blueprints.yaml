@@ -5,11 +5,11 @@ icon: star-half-o
 author:
   name: Team Grav
   email: devs@getgrav.org
-homepage: https://github.com/team-grav/grav-plugin-star-ratings
+homepage: https://github.com/getgrav/grav-plugin-star-ratings
 demo: http://demo.yoursite.com
 keywords: grav, plugin, etc
-bugs: https://github.com/team-grav/grav-plugin-star-ratings/issues
-readme: https://github.com/team-grav/grav-plugin-star-ratings/blob/develop/README.md
+bugs: https://github.com/getgrav/grav-plugin-star-ratings/issues
+readme: https://github.com/getgrav/grav-plugin-star-ratings/blob/develop/README.md
 license: MIT
 
 form:
