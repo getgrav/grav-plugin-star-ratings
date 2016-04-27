@@ -30,8 +30,11 @@
     stroke-linejoin: round;
 }
 
-/* un-used */
-.jq-shadow {
-    -webkit-filter: drop-shadow( -2px -2px 2px #888 );
-    filter: drop-shadow( -2px -2px 2px #888 );
+.star-rating-container {
+    display: inline-block;
+}
+
+.star-rating-container .star-count {
+    float: right;
+    margin-left: 1rem;
 }

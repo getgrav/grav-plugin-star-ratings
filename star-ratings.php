@@ -199,12 +199,16 @@ class StarRatingsPlugin extends Plugin
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
         }
 
+        $stars = $this->getStars($id);
+        $count_output = '';
+
         $data = [
             'id' => $id,
+            'count' => $stars[1],
             'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json','star-ratings'),
             'options' => [
                 'totalStars' => $this->config->get('plugins.star-ratings.total_stars'),
-                'initialRating' => $this->getStars($id),
+                'initialRating' => $stars[0],
                 'starSize' => $this->config->get('plugins.star-ratings.star_size'),
                 'useFullStars' => $this->config->get('plugins.star-ratings.use_full_stars'),
                 'emptyColor' => $this->config->get('plugins.star-ratings.empty_color'),
@@ -226,7 +230,11 @@ class StarRatingsPlugin extends Plugin
 
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
 
-        return '<div class="star-rating-container" data-star-rating="'.$data.'"></div>';
+        if ($this->config->get('plugins.star-ratings.show_count')) {
+            $count_output = '<span class="star-count">('.$stars[1].' votes)</span>';
+        }
+
+        return '<div class="star-rating-container" data-star-rating="'.$data.'">'.$count_output.'</div>';
     }
 
     private function getVoteData()
@@ -276,9 +284,9 @@ class StarRatingsPlugin extends Plugin
             $votes = $vote_data[$id];
             $count = count($votes);
             $score = array_sum($votes) / $count;
-            return $score;
+            return [$score, $count];
         } else {
-            return 0;
+            return [0, 0];
         }
     }
 

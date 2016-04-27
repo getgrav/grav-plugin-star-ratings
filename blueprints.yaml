@@ -169,3 +169,14 @@ form:
         0: PLUGIN_ADMIN.NO
       validate:
         type: bool
+
+    show_count:
+      type: toggle
+      label: Show count
+      help: Shows the number of votes after the star display
+      highlight: 0
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
