@@ -79,3 +79,7 @@ This is using the hard-coded value of 232 as the unique ID.  You can however, us
 ```
 
 This will use the current page's route as the unique identifier.
+
+### NOTE:
+
+If you wish to use the `{{ stars(id) }}` Twig call in your page's content rather than in a Twig template, **you must disable page cache** ([see how to do this via page headers](https://learn.getgrav.org/content/headers#cache-enable)) or the stars value will be cached and will not sure an accurate representation of the state until the cache is cleared.
