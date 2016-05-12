@@ -4,6 +4,7 @@ namespace Grav\Plugin;
 use Grav\Common\Plugin;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
+use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\File\File;
 
 
@@ -39,7 +40,7 @@ class StarRatingsPlugin extends Plugin
     {
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0],
-            'onPagesInitialized'   => ['onPagesInitialized', 0],
+
         ];
     }
 
@@ -56,50 +57,62 @@ class StarRatingsPlugin extends Plugin
             return;
         }
 
+        // Initialize core setup
+        $this->initSetup();
+
         // Enable the main event we are interested in
         $this->enable([
+            'onPageContentRaw'   => ['onPageContentRaw', 0],
+            'onPageInitialized'   => ['onPageInitialized', 0],
             'onTwigInitialized' => ['onTwigInitialized', 0],
             'onTwigSiteVariables' => ['onTwigSiteVariables', 0],
         ]);
-
     }
 
-    public function onPagesInitialized()
+    private function initSetup()
     {
-        $uri = $this->grav['uri'];
-
-        // if not in admin merge potential page-level configs
-        if (!$this->isAdmin()) {
-            $page = $this->grav['page'];
-            if ($page) {
-                $this->config->set('plugins.star-ratings', $this->mergeConfig($page));
-            }
-        }
-
         $cache = $this->grav['cache'];
 
         $data_path = $this->grav['locator']->findResource('user://data', true) . '/star-ratings/';
         $this->stars_data_path = $data_path . 'stars.json';
-        $this->ips_data_path =$data_path . 'ips.json';
+        $this->ips_data_path = $data_path . 'ips.json';
 
         $this->stars_cache_id = md5('stars-vote-data'.$cache->getKey());
         $this->ips_cache_id = md5('stars-ip-data'.$cache->getKey());
 
         $this->getVoteData();
+    }
+
+    private function initSettings($page)
+    {
+        // if not in admin merge potential page-level configs
+        if (!$this->isAdmin() && isset($page->header()->{'star-ratings'})) {
+            $this->config->set('plugins.star-ratings', $this->mergeConfig($page));
+        }
 
         $this->callback = $this->config->get('plugins.star-ratings.callback');
         $this->total_stars = $this->config->get('plugins.star-ratings.total_stars');
         $this->only_full_stars = $this->config->get('plugins.star-ratings.only_full_stars');
+    }
 
+    public function onPageContentRaw(Event $e)
+    {
+        // initialize with page settings (needed when twig used in page content / pre-cache)
+        $this->initSettings($e['page']);
+    }
 
-        if ($this->callback != $uri->path()) {
-            return;
+    public function onPageInitialized()
+    {
+        // initialize with page settings (post-cache)
+        $this->initSettings($this->grav['page']);
+
+        // Process vote if required
+        if ($this->callback === $this->grav['uri']->path()) {
+            $result = $this->addVote();
+
+            echo json_encode(['status' => $result[0], 'message' => $result[1]]);
+            exit();
         }
-
-        $result = $this->addVote();
-
-        echo json_encode(['status' => $result[0], 'message' => $result[1]]);
-        exit();
     }
 
     public function addVote()
@@ -258,7 +271,7 @@ class StarRatingsPlugin extends Plugin
                 $cache->save($this->stars_cache_id, $this->vote_data);
             }
         }
-        return $this->vote_data;
+        return (array) $this->vote_data;
     }
 
     private function saveVoteData($id = null, $data = null)
