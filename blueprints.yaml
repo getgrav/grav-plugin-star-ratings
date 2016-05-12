@@ -1,12 +1,11 @@
 name: Star Ratings
-version: 1.0.1
+version: 1.0.2
 description: Simple but Powerful Star Ratings plugin for anything!
 icon: star-half-o
 author:
   name: Team Grav
   email: devs@getgrav.org
 homepage: https://github.com/getgrav/grav-plugin-star-ratings
-demo: http://demo.yoursite.com
 keywords: grav, plugin, etc
 bugs: https://github.com/getgrav/grav-plugin-star-ratings/issues
 readme: https://github.com/getgrav/grav-plugin-star-ratings/blob/develop/README.md
@@ -58,6 +57,7 @@ form:
       size: x-small
       label: Initial stars
       help: You can populate the stars with an initial number when there are no votes
+      prepend: '<i class="fa fa-star-o"></i>'
       validate:
         type: number
         min: 0
@@ -84,6 +84,7 @@ form:
       size: x-small
       label: Star size
       help: The size in pixels fo the stars
+      append: px
       validate:
         type: number
         min: 5
