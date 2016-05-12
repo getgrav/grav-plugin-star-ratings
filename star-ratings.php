@@ -17,12 +17,9 @@ class StarRatingsPlugin extends Plugin
     protected $callback;
     protected $total_stars;
     protected $only_full_stars;
-
     protected $stars_data_path;
     protected $ips_data_path;
-
     protected $vote_data;
-
     protected $stars_cache_id;
     protected $ips_cache_id;
 
@@ -39,8 +36,7 @@ class StarRatingsPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onPluginsInitialized' => ['onPluginsInitialized', 0],
-
+            'onPluginsInitialized'  => ['onPluginsInitialized', 0],
         ];
     }
 
@@ -51,9 +47,6 @@ class StarRatingsPlugin extends Plugin
     {
         // Don't proceed if we are in the admin plugin
         if ($this->isAdmin()) {
-            $this->enable([
-                'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0]
-            ]);
             return;
         }
 
@@ -62,10 +55,10 @@ class StarRatingsPlugin extends Plugin
 
         // Enable the main event we are interested in
         $this->enable([
-            'onPageContentRaw'   => ['onPageContentRaw', 0],
-            'onPageInitialized'   => ['onPageInitialized', 0],
-            'onTwigInitialized' => ['onTwigInitialized', 0],
-            'onTwigSiteVariables' => ['onTwigSiteVariables', 0],
+            'onPageContentRaw'      => ['onPageContentRaw', 0],
+            'onPageInitialized'     => ['onPageInitialized', 0],
+            'onTwigInitialized'     => ['onTwigInitialized', 0],
+            'onTwigSiteVariables'   => ['onTwigSiteVariables', 0],
         ]);
     }
 
@@ -73,13 +66,14 @@ class StarRatingsPlugin extends Plugin
     {
         $cache = $this->grav['cache'];
 
+        // set some default configuration options
         $data_path = $this->grav['locator']->findResource('user://data', true) . '/star-ratings/';
         $this->stars_data_path = $data_path . 'stars.json';
         $this->ips_data_path = $data_path . 'ips.json';
-
         $this->stars_cache_id = md5('stars-vote-data'.$cache->getKey());
         $this->ips_cache_id = md5('stars-ip-data'.$cache->getKey());
 
+        // initialize data
         $this->getVoteData();
     }
 
@@ -108,6 +102,8 @@ class StarRatingsPlugin extends Plugin
 
         // Process vote if required
         if ($this->callback === $this->grav['uri']->path()) {
+
+            // try to add the vote
             $result = $this->addVote();
 
             echo json_encode(['status' => $result[0], 'message' => $result[1]]);
@@ -122,6 +118,7 @@ class StarRatingsPlugin extends Plugin
             return [false, 'Invalid security nonce'];
         }
 
+        // get and filter the data
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $id          = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_STRING);
 
@@ -164,14 +161,6 @@ class StarRatingsPlugin extends Plugin
     }
 
     /**
-     * Add templates directory to twig lookup paths.
-     */
-    public function onTwigTemplatePaths()
-    {
-        $this->grav['twig']->twig_paths[] = __DIR__ . '/admin/templates';
-    }
-
-    /**
      * Add simple `stars()` Twig function
      */
     public function onTwigInitialized()
@@ -195,8 +184,6 @@ class StarRatingsPlugin extends Plugin
             ->add('jquery', 101)
             ->addJs('plugin://star-ratings/assets/jquery.star-rating-svg.min.js')
             ->addJs('plugin://star-ratings/assets/star-ratings.js');
-
-
     }
 
     /**
@@ -259,19 +246,26 @@ class StarRatingsPlugin extends Plugin
             if ($vote_data === false) {
                 $fileInstance = File::instance($this->stars_data_path);
 
+                // load file contents and decode JSON
                 if (!$fileInstance->content()) {
                     $vote_data = [];
                 } else {
                     $vote_data = json_decode($fileInstance->content(), true);
                 }
-                // store data in plugin
-                $this->vote_data = $vote_data;
 
                 // store data in cache
-                $cache->save($this->stars_cache_id, $this->vote_data);
+                $cache->save($this->stars_cache_id, $vote_data);
+            }
+            // set vote data on object
+            $this->vote_data = $vote_data;
+
+            // set to empty data if nothing found
+            if (is_null($this->vote_data)) {
+                $this->vote_data = [];
             }
         }
-        return (array) $this->vote_data;
+
+        return $this->vote_data;
     }
 
     private function saveVoteData($id = null, $data = null)
