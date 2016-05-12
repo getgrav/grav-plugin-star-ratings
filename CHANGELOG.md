@@ -1,3 +1,10 @@
+# v1.0.3
+##  05/12/2016
+
+1. [](#bugfix)
+    * Refactored `addVote()` to work better with cache on
+    * Updated README to reference need for cache off when using Twig function in page content
+
 # v1.0.2
 ##  05/12/2016
 
