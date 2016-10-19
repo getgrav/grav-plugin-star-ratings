@@ -1,3 +1,9 @@
+# v1.0.4
+##  10/18/2016
+
+1. [](#bugfix)
+    * Fixed a typo in blueprints for docs
+
 # v1.0.3
 ##  05/12/2016
 
