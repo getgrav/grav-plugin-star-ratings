@@ -1,5 +1,5 @@
 name: Star Ratings
-version: 1.0.4
+version: 2.0.0
 description: Simple but Powerful Star Ratings plugin for anything!
 icon: star-half-o
 author:
@@ -193,7 +193,7 @@ form:
       validate:
         type: bool
 
-    show_count:
+    show_score:
       type: toggle
       label: Show score
       help: Shows the average score of votes
