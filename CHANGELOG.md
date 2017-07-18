@@ -1,3 +1,13 @@
+# v1.1.0
+##  07/18/2017
+
+1. [](#improved)
+    * Updated star-ratings-svg to latest version
+    * Added `star_shape` option ('straight' [default], 'rounded')
+    * Added `global_initialization` setting to allow global page options for the stars, rather than repeating for all individual items
+1. [](#bugfix)
+    * Fixed `initial_stars` setting not properly getting set through options
+
 # v1.0.4
 ##  10/18/2016
 

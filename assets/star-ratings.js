@@ -3,7 +3,8 @@ jQuery(function() {
         element = $(element);
 
         var data = element.data('star-rating'),
-            options = jQuery.extend(data.options, {
+            globalOptions = window.StarRatingsOptions ? window.StarRatingsOptions : {},
+            options = jQuery.extend(data.options, globalOptions, {
                 callback: function(currentRating, element) {
                     $.post(data.uri, { id: data.id, rating: currentRating })
                      .done(function() {
@@ -15,6 +16,9 @@ jQuery(function() {
                 }
             });
 
+        if (options.readOnly) {
+            element.addClass('disabled');
+        }
         element.starRating(options);
     });
 });

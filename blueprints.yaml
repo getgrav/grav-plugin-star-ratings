@@ -135,6 +135,17 @@ form:
       size: medium
       label: End gradient color
 
+    star_shape:
+      type: select
+      size: small
+      label: Star Shape
+      classes: fancy
+      help: The shape of the stars
+      default: 'straight'
+      options:
+          straight: 'Straight'
+          rounded: 'Rounded'
+
     stroke_width:
       type: text
       size: x-small

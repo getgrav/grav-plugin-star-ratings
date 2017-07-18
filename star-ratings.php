@@ -184,6 +184,10 @@ class StarRatingsPlugin extends Plugin
             ->add('jquery', 101)
             ->addJs('plugin://star-ratings/assets/jquery.star-rating-svg.min.js')
             ->addJs('plugin://star-ratings/assets/star-ratings.js');
+
+        if ($this->config->get('plugins.star-ratings.global_initialization', 0)) {
+            $this->grav['assets']->addInlineJS('var StarRatingsOptions = ' . json_encode($this->getData()) . ';');
+        }
     }
 
     /**
@@ -199,26 +203,38 @@ class StarRatingsPlugin extends Plugin
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
         }
 
-        $stars = $this->getStars($id);
         $count_output = '';
+        $data = $this->getData($id, $options);
 
+        if ($this->config->get('plugins.star-ratings.show_count')) {
+            $count_output = '<span class="star-count">('.$stars[1].' votes)</span>';
+        }
+
+        if ($this->config->get('plugins.star-ratings.global_initialization', 0)) {
+            unset($data['options']);
+        }
+
+        $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
+        return '<div class="star-rating-container" data-star-rating="'.$data.'">'.$count_output.'</div>';
+    }
+
+    public function getData($id = null, $options = [])
+    {
+        $stars = $id ? $this->getStars($id) : [0, 0];
         $data = [
             'id' => $id,
             'count' => $stars[1],
             'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json','star-ratings'),
             'options' => [
                 'totalStars' => $this->config->get('plugins.star-ratings.total_stars'),
-                'initialRating' => $stars[0],
+                'initialRating' => $this->config->get('plugins.star-ratings.initial_stars', $stars[0]),
                 'starSize' => $this->config->get('plugins.star-ratings.star_size'),
                 'useFullStars' => $this->config->get('plugins.star-ratings.use_full_stars'),
                 'emptyColor' => $this->config->get('plugins.star-ratings.empty_color'),
                 'hoverColor' => $this->config->get('plugins.star-ratings.hover_color'),
                 'activeColor' => $this->config->get('plugins.star-ratings.active_color'),
                 'useGradient' => $this->config->get('plugins.star-ratings.use_gradient'),
-                'starGradient' => [
-                    'start' => $this->config->get('plugins.star-ratings.star_gradient_start'),
-                    'end' => $this->config->get('plugins.star-ratings.star_gradient_end')
-                ],
+                'starShape' => $this->config->get('plugins.star-ratings.star_shape'),
                 'readOnly' => $this->config->get('plugins.star-ratings.readonly'),
                 'disableAfterRate' => $this->config->get('plugins.star-ratings.disable_after_rate'),
                 'strokeWidth' => $this->config->get('plugins.star-ratings.stroke_width'),
@@ -226,15 +242,16 @@ class StarRatingsPlugin extends Plugin
             ]
         ];
 
-        $data['options'] = array_replace_recursive($data['options'], $options);
-
-        $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-
-        if ($this->config->get('plugins.star-ratings.show_count')) {
-            $count_output = '<span class="star-count">('.$stars[1].' votes)</span>';
+        if ($data['options']['useGradient']) {
+            $data['options']['starGradient'] = [
+                'start' => $this->config->get('plugins.star-ratings.star_gradient_start'),
+                'end' => $this->config->get('plugins.star-ratings.star_gradient_end')
+            ];
         }
 
-        return '<div class="star-rating-container" data-star-rating="'.$data.'">'.$count_output.'</div>';
+        $data = array_replace_recursive($data, $options);
+
+        return $id ? $data : $data['options']; // htmlspecialchars(json_encode($id ? $data : $data['options'], ENT_QUOTES));
     }
 
     private function getVoteData()
