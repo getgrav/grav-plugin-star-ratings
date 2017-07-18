@@ -173,6 +173,9 @@ class StarRatingsPlugin extends Plugin
         $this->grav['twig']->twig()->addFunction(
             new \Twig_SimpleFunction('stars', [$this, 'generateStars'])
         );
+        $this->grav['twig']->twig()->addFunction(
+            new \Twig_SimpleFunction('star_data', [$this, 'getData'])
+        );
     }
 
     /**
@@ -253,6 +256,7 @@ class StarRatingsPlugin extends Plugin
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
         return '<div class="star-ratings"><div class="star-rating-container hover" data-tooltip="I’m the tooltip text." data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>' . $aggregate_rating;
     }
+
 
     public function getData($id = null, $options = [])
     {

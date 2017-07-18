@@ -83,6 +83,25 @@ This is using the hard-coded value of 232 as the unique ID.  You can however, us
 
 This will use the current page's route as the unique identifier.
 
+You can also get at the raw data array:
+
+```
+{% set my_data = star_data(232) %}
+```
+
+This will return all the data for this specific item:
+
+```
+[
+  'id' => 232,
+  'count' => 2,
+  'score' => 2.25
+]
+
+```
+
+So you can easily display just the score with: `{{ my_data.score }}`.
+
 You can also pass options to the `stars` function
 
 ```

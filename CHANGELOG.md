@@ -4,6 +4,7 @@
 1. [](#new)
     * Aggregated Rating (Rich Snippets) is now supported, for more details check the documentation [#6](https://github.com/getgrav/grav-plugin-star-ratings/issues/6)
     * Added optional average score display [#7](https://github.com/getgrav/grav-plugin-star-ratings/issues/7)
+    * Added new `star_data()` Twig function [#4](https://github.com/getgrav/grav-plugin-star-ratings/issues/4)
 1. [](#improved)
     * Updated star-ratings-svg to latest version
     * Added `star_shape` option ('straight' [default], 'rounded')
