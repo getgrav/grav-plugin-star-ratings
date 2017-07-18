@@ -106,7 +106,7 @@ class StarRatingsPlugin extends Plugin
             // try to add the vote
             $result = $this->addVote();
 
-            echo json_encode(['status' => $result[0], 'message' => $result[1]]);
+            echo json_encode(['status' => $result[0], 'message' => $result[1], 'data' => ['score' => $result[2][0], 'count' => $result[2][1]]]);
             exit();
         }
     }
@@ -122,6 +122,8 @@ class StarRatingsPlugin extends Plugin
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $id          = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_STRING);
 
+        $data = $this->getStars($id);
+
         // ensure both values are sent
         if (is_null($star_rating) || is_null($id)) {
             return [false, 'missing either id or rating'];
@@ -130,7 +132,7 @@ class StarRatingsPlugin extends Plugin
         // check for duplicate vote if configured
         if ($this->config->get('plugins.star-ratings.unique_ip_check')) {
             if (!$this->validateIp($id)) {
-                return [false, 'This IP has already voted'];
+                return [false, 'This IP has already voted', $data];
             }
         }
 
@@ -157,7 +159,9 @@ class StarRatingsPlugin extends Plugin
 
         $this->saveVoteData($id, $rating);
 
-        return [true, 'Your vote has been added!'];
+        $data = $this->getStars($id);
+
+        return [true, 'Your vote has been added!', $data];
     }
 
     /**
