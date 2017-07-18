@@ -1,12 +1,11 @@
 <?php
 namespace Grav\Plugin;
 
+use Grav\Common\File\CompiledJsonFile;
 use Grav\Common\Plugin;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
 use RocketTheme\Toolbox\Event\Event;
-use RocketTheme\Toolbox\File\File;
-
 
 /**
  * Class StarRatingsPlugin
@@ -300,14 +299,9 @@ class StarRatingsPlugin extends Plugin
             $vote_data = $cache->fetch($this->stars_cache_id);
 
             if ($vote_data === false) {
-                $fileInstance = File::instance($this->stars_data_path);
+                $fileInstance = CompiledJsonFile::instance($this->stars_data_path);
 
-                // load file contents and decode JSON
-                if (!$fileInstance->content()) {
-                    $vote_data = [];
-                } else {
-                    $vote_data = json_decode($fileInstance->content(), true);
-                }
+                $vote_data = $fileInstance->content();
 
                 // store data in cache
                 $cache->save($this->stars_cache_id, $vote_data);
@@ -334,10 +328,8 @@ class StarRatingsPlugin extends Plugin
         $this->grav['cache']->save($this->stars_cache_id, $this->vote_data);
 
         // save in file
-        $fileInstance = File::instance($this->stars_data_path);
-        $data = json_encode((array)$this->vote_data);
-        $fileInstance->content($data);
-        $fileInstance->save();
+        $fileInstance = CompiledJsonFile::instance($this->stars_data_path);
+        $fileInstance->save($this->vote_data);
     }
 
     private function getStars($id)
@@ -356,13 +348,9 @@ class StarRatingsPlugin extends Plugin
     private function validateIp($id, $store = false)
     {
         $user_ip = $this->grav['uri']->ip();
-        $fileInstance = File::instance($this->ips_data_path);
+        $fileInstance = CompiledJsonFile::instance($this->ips_data_path);
 
-        if (!$fileInstance->content()) {
-            $ip_data = [];
-        } else {
-            $ip_data = json_decode($fileInstance->content(), true);
-        }
+        $ip_data = $fileInstance->content();
 
         if (array_key_exists($user_ip, $ip_data)) {
             $user_ip_data = $ip_data[$user_ip];
@@ -377,9 +365,7 @@ class StarRatingsPlugin extends Plugin
 
         if ($store) {
             $ip_data[$user_ip] = $user_ip_data;
-            $data = json_encode((array)$ip_data);
-            $fileInstance->content($data);
-            $fileInstance->save();
+            $fileInstance->save($ip_data);
         }
 
         return true;
