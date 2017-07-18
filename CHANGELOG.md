@@ -9,6 +9,8 @@
     * Updated star-ratings-svg to latest version
     * Added `star_shape` option ('straight' [default], 'rounded')
     * Added `global_initialization` setting to allow global page options for the stars, rather than repeating for all individual items
+    * Better handling messages through tooltips when voting or if a vote fails to register
+    * Automatically disable ability to vote if already voted and `unique_ip_check` option is enabled
 1. [](#bugfix)
     * Fixed `initial_stars` setting not properly getting set through options
     * Fixed issue with `show_count` throwing off the hovering position [#5](https://github.com/getgrav/grav-plugin-star-ratings/issues/5)

@@ -105,7 +105,7 @@ class StarRatingsPlugin extends Plugin
             // try to add the vote
             $result = $this->addVote();
 
-            echo json_encode(['status' => $result[0], 'message' => $result[1], 'data' => ['score' => $result[2][0], 'count' => $result[2][1]]]);
+            echo json_encode(['status' => $result[0], 'message' => $result[1], 'data' => ['score' => round($result[2][0], 1), 'count' => $result[2][1]]]);
             exit();
         }
     }
@@ -114,7 +114,7 @@ class StarRatingsPlugin extends Plugin
     {
         $nonce = $this->grav['uri']->param('nonce');
         if (!Utils::verifyNonce($nonce, 'star-ratings')) {
-            return [false, 'Invalid security nonce'];
+            return [false, 'Invalid security nonce', [0, 0]];
         }
 
         $language = $this->grav['language'];
@@ -127,7 +127,7 @@ class StarRatingsPlugin extends Plugin
 
         // ensure both values are sent
         if (is_null($star_rating) || is_null($id)) {
-            return [false, 'missing either id or rating'];
+            return [false, 'missing either id or rating', [0, 0]];
         }
 
         // check for duplicate vote if configured
@@ -254,7 +254,7 @@ class StarRatingsPlugin extends Plugin
         }
 
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-        return '<div class="star-ratings"><div class="star-rating-container hover" data-tooltip="I’m the tooltip text." data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>' . $aggregate_rating;
+        return '<div class="star-ratings"><div class="star-rating-container" data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div><div class="star-data-container">'. $score_output . $count_output . '</div></div>' . $aggregate_rating;
     }
 
 
