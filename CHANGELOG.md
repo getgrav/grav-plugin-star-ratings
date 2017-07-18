@@ -1,3 +1,9 @@
+# v2.0.1
+## 07/18/2017
+
+1. [](#new)
+    * Added new option `vote_access` to prevent unhautorized users from voting
+
 # v2.0.0
 ## 07/18/2017
 

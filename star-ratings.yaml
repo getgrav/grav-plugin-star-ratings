@@ -1,4 +1,5 @@
 enabled: true
+vote_access: # site.login
 callback: '/star-ratings'
 built_in_css: true
 unique_ip_check: true
