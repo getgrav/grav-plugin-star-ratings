@@ -10,6 +10,7 @@
     * Added `global_initialization` setting to allow global page options for the stars, rather than repeating for all individual items
 1. [](#bugfix)
     * Fixed `initial_stars` setting not properly getting set through options
+    * Fixed issue with `show_count` throwing off the hovering position [#5](https://github.com/getgrav/grav-plugin-star-ratings/issues/5)
 
 # v1.0.4
 ##  10/18/2016
