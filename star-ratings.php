@@ -131,7 +131,7 @@ class StarRatingsPlugin extends Plugin
 
         // check for duplicate vote if configured
         if ($this->config->get('plugins.star-ratings.unique_ip_check')) {
-            if (!$this->validateIp($id)) {
+            if (!$this->validateIp($id, true)) {
                 return [false, 'This IP has already voted', $data];
             }
         }
@@ -209,6 +209,8 @@ class StarRatingsPlugin extends Plugin
 
         $score_output = '';
         $count_output = '';
+        $voted = false;
+
         $data = $this->getData($id, $options);
 
         if ($this->config->get('plugins.star-ratings.show_score')) {
@@ -223,8 +225,14 @@ class StarRatingsPlugin extends Plugin
             unset($data['options']);
         }
 
+        if ($this->config->get('plugins.star-ratings.unique_ip_check')) {
+            if (!$this->validateIp($id)) {
+                $voted = true;
+            }
+        }
+
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-        return '<div class="star-ratings"><div class="star-rating-container" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>';
+        return '<div class="star-ratings"><div class="star-rating-container" data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>';
     }
 
     public function getData($id = null, $options = [])
@@ -325,7 +333,7 @@ class StarRatingsPlugin extends Plugin
         }
     }
 
-    private function validateIp($id)
+    private function validateIp($id, $store = false)
     {
         $user_ip = $this->grav['uri']->ip();
         $fileInstance = File::instance($this->ips_data_path);
@@ -347,14 +355,14 @@ class StarRatingsPlugin extends Plugin
             $user_ip_data = [$id];
         }
 
-        $ip_data[$user_ip] = $user_ip_data;
-
-        $data = json_encode((array)$ip_data);
-        $fileInstance->content($data);
-        $fileInstance->save();
+        if ($store) {
+            $ip_data[$user_ip] = $user_ip_data;
+            $data = json_encode((array)$ip_data);
+            $fileInstance->content($data);
+            $fileInstance->save();
+        }
 
         return true;
-
     }
 
 }
