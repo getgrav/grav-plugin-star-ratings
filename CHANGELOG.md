@@ -1,3 +1,9 @@
+# v2.0.2
+## xx/xx/2017
+
+1. [](#bugfix)
+    * Fixed score rounding where it should always maintain 1 decimal place
+
 # v2.0.1
 ## 07/18/2017
 
