@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
     * Fixed score rounding where it should always maintain 1 decimal place
+    * Display tooltip indicating user has already voted
 
 # v2.0.1
 ## 07/18/2017

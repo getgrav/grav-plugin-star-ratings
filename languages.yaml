@@ -3,6 +3,6 @@ en:
     VOTES_TEXT: '<span class="star-count">(<span>%1$s</span> votes)</span>'
     SCORE_TEXT: '<span class="star-score">%1$s</span>'
     VOTE_SUCCESS: 'Your vote has been added!'
-    VOTE_FAIL_IP: 'This IP has already voted'
+    VOTE_FAIL_IP: 'You have already voted'
     LOGIN_REQUIRED: 'Login required in order to vote'
 

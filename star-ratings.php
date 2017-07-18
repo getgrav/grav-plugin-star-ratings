@@ -255,6 +255,11 @@ class StarRatingsPlugin extends Plugin
         }
 
         $tooltip = isset($data['options']['loginRequired']) && $data['options']['loginRequired'] ? 'data-tooltip="' . $language->translate('PLUGIN_STAR_RATINGS.LOGIN_REQUIRED') . '"' : '';
+
+        if ($voted) {
+            $tooltip = 'data-tooltip="' . $language->translate('PLUGIN_STAR_RATINGS.VOTE_FAIL_IP') . '"';
+        }
+
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
         return '<div class="star-ratings"><div class="star-rating-container" ' . $tooltip . ' data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div><div class="star-data-container">'. $score_output . $count_output . '</div></div>' . $aggregate_rating;
     }
