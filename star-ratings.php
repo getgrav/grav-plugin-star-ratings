@@ -226,14 +226,15 @@ class StarRatingsPlugin extends Plugin
     public function getData($id = null, $options = [])
     {
         $stars = $id ? $this->getStars($id) : [0, 0];
+        $score = $stars[1] == 0 ? $this->config->get('plugins.star-ratings.initial_stars') : $stars[0];
         $data = [
             'id' => $id,
-            'score' => $stars[1] == 0 ? $this->config->get('plugins.star-ratings.initial_stars') : $stars[0],
             'count' => $stars[1],
+            'score' => $score,
             'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json','star-ratings'),
             'options' => [
                 'totalStars' => $this->config->get('plugins.star-ratings.total_stars'),
-                'initialRating' => $this->config->get('plugins.star-ratings.initial_stars'),
+                'initialRating' => $score,
                 'starSize' => $this->config->get('plugins.star-ratings.star_size'),
                 'useFullStars' => $this->config->get('plugins.star-ratings.use_full_stars'),
                 'emptyColor' => $this->config->get('plugins.star-ratings.empty_color'),
