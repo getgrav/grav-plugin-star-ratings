@@ -38,7 +38,8 @@
     display: inline-block;
 }
 
-.star-rating-container .star-count {
+.star-rating-container .star-count,
+.star-rating-container .star-score {
     float: right;
     margin-left: 1rem;
 }

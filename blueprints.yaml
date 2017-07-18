@@ -138,7 +138,7 @@ form:
     star_shape:
       type: select
       size: small
-      label: Star Shape
+      label: Star shape
       classes: fancy
       help: The shape of the stars
       default: 'straight'
@@ -186,6 +186,17 @@ form:
       type: toggle
       label: Show count
       help: Shows the number of votes after the star display
+      highlight: 0
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
+
+    show_count:
+      type: toggle
+      label: Show score
+      help: Shows the average score of votes
       highlight: 0
       options:
         1: PLUGIN_ADMIN.YES

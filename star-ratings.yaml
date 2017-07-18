@@ -17,4 +17,4 @@ disable_after_rate: true
 stroke_width: 0
 stroke_color: '#999999'
 show_count: false
-
+show_score: true

@@ -203,11 +203,16 @@ class StarRatingsPlugin extends Plugin
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
         }
 
+        $score_output = '';
         $count_output = '';
         $data = $this->getData($id, $options);
 
+        if ($this->config->get('plugins.star-ratings.show_score')) {
+            $score_output = $this->grav['language']->translate(['PLUGIN_STAR_RATINGS.SCORE_TEXT', $data['score']]);
+        }
+
         if ($this->config->get('plugins.star-ratings.show_count')) {
-            $count_output = '<span class="star-count">('.$data['count'].' votes)</span>';
+            $count_output = $this->grav['language']->translate(['PLUGIN_STAR_RATINGS.VOTES_TEXT', $data['count']]);
         }
 
         if ($this->config->get('plugins.star-ratings.global_initialization', 0)) {
@@ -215,7 +220,7 @@ class StarRatingsPlugin extends Plugin
         }
 
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-        return '<div class="star-rating-container" data-star-rating="'.$data.'">'.$count_output.'</div>';
+        return '<div class="star-rating-container" data-star-rating="'.$data.'">' . $count_output . $score_output .'</div>';
     }
 
     public function getData($id = null, $options = [])
@@ -223,11 +228,12 @@ class StarRatingsPlugin extends Plugin
         $stars = $id ? $this->getStars($id) : [0, 0];
         $data = [
             'id' => $id,
+            'score' => $stars[1] == 0 ? $this->config->get('plugins.star-ratings.initial_stars') : $stars[0],
             'count' => $stars[1],
             'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json','star-ratings'),
             'options' => [
                 'totalStars' => $this->config->get('plugins.star-ratings.total_stars'),
-                'initialRating' => $this->config->get('plugins.star-ratings.initial_stars', $stars[0]),
+                'initialRating' => $this->config->get('plugins.star-ratings.initial_stars'),
                 'starSize' => $this->config->get('plugins.star-ratings.star_size'),
                 'useFullStars' => $this->config->get('plugins.star-ratings.use_full_stars'),
                 'emptyColor' => $this->config->get('plugins.star-ratings.empty_color'),
