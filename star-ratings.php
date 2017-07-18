@@ -252,7 +252,7 @@ class StarRatingsPlugin extends Plugin
         }
 
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-        return '<div class="star-ratings"><div class="star-rating-container hover" data-tooltip="I’m the tooltip text." data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>';
+        return '<div class="star-ratings"><div class="star-rating-container hover" data-tooltip="I’m the tooltip text." data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>' . $aggregate_rating;
     }
 
     public function getData($id = null, $options = [])
@@ -290,7 +290,7 @@ class StarRatingsPlugin extends Plugin
 
         $data = array_replace_recursive($data, $options);
 
-        return $id ? $data : $data['options']; // htmlspecialchars(json_encode($id ? $data : $data['options'], ENT_QUOTES));
+        return $id ? $data : $data['options'];
     }
 
     private function getVoteData()
