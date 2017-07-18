@@ -118,6 +118,8 @@ class StarRatingsPlugin extends Plugin
             return [false, 'Invalid security nonce'];
         }
 
+        $language = $this->grav['language'];
+
         // get and filter the data
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $id          = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_STRING);
@@ -132,7 +134,7 @@ class StarRatingsPlugin extends Plugin
         // check for duplicate vote if configured
         if ($this->config->get('plugins.star-ratings.unique_ip_check')) {
             if (!$this->validateIp($id, true)) {
-                return [false, 'This IP has already voted', $data];
+                return [false, $language->translate('PLUGIN_STAR_RATINGS.VOTE_FAIL_IP'), $data];
             }
         }
 
@@ -161,7 +163,7 @@ class StarRatingsPlugin extends Plugin
 
         $data = $this->getStars($id);
 
-        return [true, 'Your vote has been added!', $data];
+        return [true, $language->translate('PLUGIN_STAR_RATINGS.VOTE_SUCCESS'), $data];
     }
 
     /**
@@ -232,7 +234,7 @@ class StarRatingsPlugin extends Plugin
         }
 
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-        return '<div class="star-ratings"><div class="star-rating-container" data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>';
+        return '<div class="star-ratings"><div class="star-rating-container hover" data-tooltip="I’m the tooltip text." data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>';
     }
 
     public function getData($id = null, $options = [])
