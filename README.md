@@ -45,12 +45,15 @@ active_color: '#ffd700'
 use_gradient: true
 star_gradient_start: '#fef7cd'
 star_gradient_end: '#ffcc00'
+star_shape: 'rounded' # 'rounded'
 readonly: false
 disable_after_rate: true
 stroke_width: 0
 stroke_color: '#999999'
 show_count: false
+global_initialization: false
 ```
+
 
 ## Page Overrides
 
@@ -79,6 +82,75 @@ This is using the hard-coded value of 232 as the unique ID.  You can however, us
 ```
 
 This will use the current page's route as the unique identifier.
+
+You can also get at the raw data array:
+
+```
+{% set my_data = star_data(232) %}
+```
+
+This will return all the data for this specific item:
+
+```
+[
+  'id' => 232,
+  'count' => 2,
+  'score' => 2.25
+]
+
+```
+
+So you can easily display just the score with: `{{ my_data.score }}`.
+
+You can also pass options to the `stars` function
+
+```
+{{ stars(page.route, { options: { readOnly: true, starSize: 50 } }) }}
+```
+
+### Aggregate Rating
+
+Since version 2.0.0 the plugin supports Aggregated Rating (Rich Snippets). In order to enable the functionality the first thing that needs to be done is to enable the `aggregate_rating` option for the page.
+
+```
+star-ratings:
+    aggregate_rating: true
+```
+
+Then from your twig file you can call the `stars` function
+
+```
+stars(page.route)
+```
+
+Aggregation supports 2 options to customize the rich snippet output:
+
+1. `title`: defaults to the `id` of the element
+2. `type`: defaults to 'Product'
+
+Everything else will get automatically calculated. 
+
+```
+stars(page.route, { options: { aggregate: { type: 'Blog', title: 'My Product } } })
+```
+
+Assuming there's been **7** votes with the worst rating of **1** and best rating of **5** with a rating value of **2.6**, this will render as:
+
+```html
+<script type="application/ld+json">{ "@context": "http://schema.org/",
+  "@type": "Blog",
+  "name": "My Product",
+  "aggregateRating":
+    {"@type": "AggregateRating",
+     "ratingValue": "2.5714285714286",
+     "bestRating": "5",
+     "worstRating": "1",
+     "ratingCount": "7"
+    }
+}</script>
+```
+
+It is advised to use the Aggregate Rating for a single element per page, rather than trying to enable the functionality for many items.
 
 ### NOTE:
 

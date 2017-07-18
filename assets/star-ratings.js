@@ -3,17 +3,42 @@ jQuery(function() {
         element = $(element);
 
         var data = element.data('star-rating'),
-            options = jQuery.extend(data.options, {
+            globalOptions = window.StarRatingsOptions ? window.StarRatingsOptions : {},
+            options = jQuery.extend(data.options, globalOptions, {
                 callback: function(currentRating, element) {
                     $.post(data.uri, { id: data.id, rating: currentRating })
-                     .done(function() {
-                        console.log('success');
+                     .done(function(response) {
+                         response = JSON.parse(response);
+
+                         var message = response.status ? response.message : 'Error: ' + response.message;
+                         element.attr('data-tooltip', message).addClass('hover');
+
+                         if (response.status) {
+                            var parent = element.parent('.star-ratings');
+                            parent.find('.star-score').text(response.data.score);
+                            parent.find('.star-count span').text(response.data.count);
+                         }
+
+                         setTimeout(function() {
+                             element.removeClass('hover');
+                         }, 3000);
                      })
-                     .fail(function() {
-                        console.log('fail');
+                     .fail(function(status, error, title) {
+                         element.attr('data-tooltip', title).addClass('hover');
+                         setTimeout(function() {
+                             element.removeClass('hover');
+                         }, 5000);
                      });
                 }
             });
+
+        if (element.data('voted')) {
+            options.readOnly = true;
+        }
+
+        if (options.readOnly) {
+            element.addClass('disabled');
+        }
 
         element.starRating(options);
     });

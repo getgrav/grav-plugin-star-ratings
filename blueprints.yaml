@@ -1,5 +1,5 @@
 name: Star Ratings
-version: 1.0.4
+version: 2.0.0
 description: Simple but Powerful Star Ratings plugin for anything!
 icon: star-half-o
 author:
@@ -135,6 +135,17 @@ form:
       size: medium
       label: End gradient color
 
+    star_shape:
+      type: select
+      size: small
+      label: Star shape
+      classes: fancy
+      help: The shape of the stars
+      default: 'straight'
+      options:
+          straight: 'Straight'
+          rounded: 'Rounded'
+
     stroke_width:
       type: text
       size: x-small
@@ -181,3 +192,26 @@ form:
         0: PLUGIN_ADMIN.NO
       validate:
         type: bool
+
+    show_score:
+      type: toggle
+      label: Show score
+      help: Shows the average score of votes
+      highlight: 0
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
+
+    aggregate_rating:
+      type: toggle
+      label: Aggregate Rating
+      help: Enables Google's Aggregate Rating for search results
+      highlight: 0
+      options:
+        1: PLUGIN_ADMIN.ENABLED
+        0: PLUGIN_ADMIN.DISABLED
+      validate:
+        type: bool
+

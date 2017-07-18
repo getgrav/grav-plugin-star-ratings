@@ -1,12 +1,11 @@
 <?php
 namespace Grav\Plugin;
 
+use Grav\Common\File\CompiledJsonFile;
 use Grav\Common\Plugin;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
 use RocketTheme\Toolbox\Event\Event;
-use RocketTheme\Toolbox\File\File;
-
 
 /**
  * Class StarRatingsPlugin
@@ -106,7 +105,7 @@ class StarRatingsPlugin extends Plugin
             // try to add the vote
             $result = $this->addVote();
 
-            echo json_encode(['status' => $result[0], 'message' => $result[1]]);
+            echo json_encode(['status' => $result[0], 'message' => $result[1], 'data' => ['score' => round($result[2][0], 1), 'count' => $result[2][1]]]);
             exit();
         }
     }
@@ -115,22 +114,26 @@ class StarRatingsPlugin extends Plugin
     {
         $nonce = $this->grav['uri']->param('nonce');
         if (!Utils::verifyNonce($nonce, 'star-ratings')) {
-            return [false, 'Invalid security nonce'];
+            return [false, 'Invalid security nonce', [0, 0]];
         }
+
+        $language = $this->grav['language'];
 
         // get and filter the data
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $id          = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_STRING);
 
+        $data = $this->getStars($id);
+
         // ensure both values are sent
         if (is_null($star_rating) || is_null($id)) {
-            return [false, 'missing either id or rating'];
+            return [false, 'missing either id or rating', [0, 0]];
         }
 
         // check for duplicate vote if configured
         if ($this->config->get('plugins.star-ratings.unique_ip_check')) {
-            if (!$this->validateIp($id)) {
-                return [false, 'This IP has already voted'];
+            if (!$this->validateIp($id, true)) {
+                return [false, $language->translate('PLUGIN_STAR_RATINGS.VOTE_FAIL_IP'), $data];
             }
         }
 
@@ -157,7 +160,9 @@ class StarRatingsPlugin extends Plugin
 
         $this->saveVoteData($id, $rating);
 
-        return [true, 'Your vote has been added!'];
+        $data = $this->getStars($id);
+
+        return [true, $language->translate('PLUGIN_STAR_RATINGS.VOTE_SUCCESS'), $data];
     }
 
     /**
@@ -167,6 +172,9 @@ class StarRatingsPlugin extends Plugin
     {
         $this->grav['twig']->twig()->addFunction(
             new \Twig_SimpleFunction('stars', [$this, 'generateStars'])
+        );
+        $this->grav['twig']->twig()->addFunction(
+            new \Twig_SimpleFunction('star_data', [$this, 'getData'])
         );
     }
 
@@ -184,6 +192,10 @@ class StarRatingsPlugin extends Plugin
             ->add('jquery', 101)
             ->addJs('plugin://star-ratings/assets/jquery.star-rating-svg.min.js')
             ->addJs('plugin://star-ratings/assets/star-ratings.js');
+
+        if ($this->config->get('plugins.star-ratings.global_initialization', 0)) {
+            $this->grav['assets']->addInlineJS('var StarRatingsOptions = ' . json_encode($this->getData()) . ';');
+        }
     }
 
     /**
@@ -193,32 +205,78 @@ class StarRatingsPlugin extends Plugin
      * @param array $options
      * @return string
      */
-    public function generateStars($id=null, $options = [])
+    public function generateStars($id = null, $options = [])
     {
         if ($id === null) {
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
         }
 
-        $stars = $this->getStars($id);
+        $score_output = '';
         $count_output = '';
+        $voted = false;
 
+        $data = $this->getData($id, $options);
+
+        if ($this->config->get('plugins.star-ratings.show_score')) {
+            $score_output = $this->grav['language']->translate(['PLUGIN_STAR_RATINGS.SCORE_TEXT', number_format($data['score'],1)]);
+        }
+
+        if ($this->config->get('plugins.star-ratings.show_count')) {
+            $count_output = $this->grav['language']->translate(['PLUGIN_STAR_RATINGS.VOTES_TEXT', $data['count']]);
+        }
+
+        if ($this->config->get('plugins.star-ratings.global_initialization', 0)) {
+            unset($data['options']);
+        }
+
+        if ($this->config->get('plugins.star-ratings.unique_ip_check')) {
+            if (!$this->validateIp($id)) {
+                $voted = true;
+            }
+        }
+
+        $aggregate_rating = '';
+        if ($this->config->get('plugins.star-ratings.aggregate_rating')) {
+            $title = isset($data['options']['aggregate']) && isset($data['options']['aggregate']['title']) ? $data['options']['aggregate']['title'] : $id;
+            $type = isset($data['options']['aggregate']) && isset($data['options']['aggregate']['type']) ? $data['options']['aggregate']['type'] : 'Product';
+
+            $aggregate_rating = '<script type="application/ld+json">{ "@context": "http://schema.org/",
+              "@type": "' . $type . '",
+              "name": "' . $title . '",
+              "aggregateRating":
+                {"@type": "AggregateRating",
+                 "ratingValue": "' . $data['score'] . '",
+                 "bestRating": "' . $this->config->get('plugins.star-ratings.total_stars') . '",
+                 "worstRating": "1",
+                 "ratingCount": "' . ($data['count'] ?: 1) . '"
+                }
+            }</script>';
+        }
+
+        $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
+        return '<div class="star-ratings"><div class="star-rating-container" data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div><div class="star-data-container">'. $score_output . $count_output . '</div></div>' . $aggregate_rating;
+    }
+
+
+    public function getData($id = null, $options = [])
+    {
+        $stars = $id ? $this->getStars($id) : [0, 0];
+        $score = $stars[1] == 0 ? $this->config->get('plugins.star-ratings.initial_stars') : $stars[0];
         $data = [
             'id' => $id,
             'count' => $stars[1],
+            'score' => $score,
             'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json','star-ratings'),
             'options' => [
                 'totalStars' => $this->config->get('plugins.star-ratings.total_stars'),
-                'initialRating' => $stars[0],
+                'initialRating' => $score,
                 'starSize' => $this->config->get('plugins.star-ratings.star_size'),
                 'useFullStars' => $this->config->get('plugins.star-ratings.use_full_stars'),
                 'emptyColor' => $this->config->get('plugins.star-ratings.empty_color'),
                 'hoverColor' => $this->config->get('plugins.star-ratings.hover_color'),
                 'activeColor' => $this->config->get('plugins.star-ratings.active_color'),
                 'useGradient' => $this->config->get('plugins.star-ratings.use_gradient'),
-                'starGradient' => [
-                    'start' => $this->config->get('plugins.star-ratings.star_gradient_start'),
-                    'end' => $this->config->get('plugins.star-ratings.star_gradient_end')
-                ],
+                'starShape' => $this->config->get('plugins.star-ratings.star_shape'),
                 'readOnly' => $this->config->get('plugins.star-ratings.readonly'),
                 'disableAfterRate' => $this->config->get('plugins.star-ratings.disable_after_rate'),
                 'strokeWidth' => $this->config->get('plugins.star-ratings.stroke_width'),
@@ -226,15 +284,16 @@ class StarRatingsPlugin extends Plugin
             ]
         ];
 
-        $data['options'] = array_replace_recursive($data['options'], $options);
-
-        $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-
-        if ($this->config->get('plugins.star-ratings.show_count')) {
-            $count_output = '<span class="star-count">('.$stars[1].' votes)</span>';
+        if ($data['options']['useGradient']) {
+            $data['options']['starGradient'] = [
+                'start' => $this->config->get('plugins.star-ratings.star_gradient_start'),
+                'end' => $this->config->get('plugins.star-ratings.star_gradient_end')
+            ];
         }
 
-        return '<div class="star-rating-container" data-star-rating="'.$data.'">'.$count_output.'</div>';
+        $data = array_replace_recursive($data, $options);
+
+        return $id ? $data : $data['options'];
     }
 
     private function getVoteData()
@@ -244,14 +303,9 @@ class StarRatingsPlugin extends Plugin
             $vote_data = $cache->fetch($this->stars_cache_id);
 
             if ($vote_data === false) {
-                $fileInstance = File::instance($this->stars_data_path);
+                $fileInstance = CompiledJsonFile::instance($this->stars_data_path);
 
-                // load file contents and decode JSON
-                if (!$fileInstance->content()) {
-                    $vote_data = [];
-                } else {
-                    $vote_data = json_decode($fileInstance->content(), true);
-                }
+                $vote_data = $fileInstance->content();
 
                 // store data in cache
                 $cache->save($this->stars_cache_id, $vote_data);
@@ -278,10 +332,8 @@ class StarRatingsPlugin extends Plugin
         $this->grav['cache']->save($this->stars_cache_id, $this->vote_data);
 
         // save in file
-        $fileInstance = File::instance($this->stars_data_path);
-        $data = json_encode((array)$this->vote_data);
-        $fileInstance->content($data);
-        $fileInstance->save();
+        $fileInstance = CompiledJsonFile::instance($this->stars_data_path);
+        $fileInstance->save($this->vote_data);
     }
 
     private function getStars($id)
@@ -297,16 +349,12 @@ class StarRatingsPlugin extends Plugin
         }
     }
 
-    private function validateIp($id)
+    private function validateIp($id, $store = false)
     {
         $user_ip = $this->grav['uri']->ip();
-        $fileInstance = File::instance($this->ips_data_path);
+        $fileInstance = CompiledJsonFile::instance($this->ips_data_path);
 
-        if (!$fileInstance->content()) {
-            $ip_data = [];
-        } else {
-            $ip_data = json_decode($fileInstance->content(), true);
-        }
+        $ip_data = $fileInstance->content();
 
         if (array_key_exists($user_ip, $ip_data)) {
             $user_ip_data = $ip_data[$user_ip];
@@ -319,14 +367,12 @@ class StarRatingsPlugin extends Plugin
             $user_ip_data = [$id];
         }
 
-        $ip_data[$user_ip] = $user_ip_data;
-
-        $data = json_encode((array)$ip_data);
-        $fileInstance->content($data);
-        $fileInstance->save();
+        if ($store) {
+            $ip_data[$user_ip] = $user_ip_data;
+            $fileInstance->save($ip_data);
+        }
 
         return true;
-
     }
 
 }
