@@ -208,7 +208,7 @@ class StarRatingsPlugin extends Plugin
         $data = $this->getData($id, $options);
 
         if ($this->config->get('plugins.star-ratings.show_score')) {
-            $score_output = $this->grav['language']->translate(['PLUGIN_STAR_RATINGS.SCORE_TEXT', $data['score']]);
+            $score_output = $this->grav['language']->translate(['PLUGIN_STAR_RATINGS.SCORE_TEXT', number_format($data['score'],1)]);
         }
 
         if ($this->config->get('plugins.star-ratings.show_count')) {
@@ -220,7 +220,7 @@ class StarRatingsPlugin extends Plugin
         }
 
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-        return '<div class="star-rating-container" data-star-rating="'.$data.'">' . $count_output . $score_output .'</div>';
+        return '<div class="star-ratings"><div class="star-rating-container" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>';
     }
 
     public function getData($id = null, $options = [])

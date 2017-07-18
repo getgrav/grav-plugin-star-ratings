@@ -36,10 +36,14 @@
 
 .star-rating-container {
     display: inline-block;
+    vertical-align: middle;
 }
 
-.star-rating-container .star-count,
-.star-rating-container .star-score {
-    float: right;
+.star-ratings .star-count {
     margin-left: 1rem;
+}
+
+.star-ratings .star-score {
+    font-weight: bold;
+    margin-left: 0.5rem;
 }
