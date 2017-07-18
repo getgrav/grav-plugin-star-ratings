@@ -207,6 +207,7 @@ class StarRatingsPlugin extends Plugin
      */
     public function generateStars($id = null, $options = [])
     {
+        $language = $this->grav['language'];
         if ($id === null) {
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
         }
@@ -253,8 +254,9 @@ class StarRatingsPlugin extends Plugin
             }</script>';
         }
 
+        $tooltip = isset($data['options']['loginRequired']) && $data['options']['loginRequired'] ? 'data-tooltip="' . $language->translate('PLUGIN_STAR_RATINGS.LOGIN_REQUIRED') . '"' : '';
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-        return '<div class="star-ratings"><div class="star-rating-container" data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div><div class="star-data-container">'. $score_output . $count_output . '</div></div>' . $aggregate_rating;
+        return '<div class="star-ratings"><div class="star-rating-container" ' . $tooltip . ' data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div><div class="star-data-container">'. $score_output . $count_output . '</div></div>' . $aggregate_rating;
     }
 
 
@@ -292,6 +294,12 @@ class StarRatingsPlugin extends Plugin
         }
 
         $data = array_replace_recursive($data, $options);
+
+        $vote_access = $this->config->get('plugins.star-ratings.vote_access');
+        if ($vote_access && !$this->grav['user']->authorize($vote_access)) {
+            $data['options']['readOnly'] = true;
+            $data['options']['loginRequired'] = true;
+        }
 
         return $id ? $data : $data['options'];
     }

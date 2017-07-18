@@ -41,6 +41,13 @@ form:
       validate:
         type: bool
 
+    vote_access:
+      type: text
+      size: medium
+      label: Vote Access
+      help: Level of vote access required in order to vote
+      placeholder: site.login
+
     unique_ip_check:
       type: toggle
       label: Unique IP Check
@@ -210,8 +217,8 @@ form:
       help: Enables Google's Aggregate Rating for search results
       highlight: 0
       options:
-        1: PLUGIN_ADMIN.ENABLED
-        0: PLUGIN_ADMIN.DISABLED
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
       validate:
         type: bool
 
