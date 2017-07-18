@@ -16,9 +16,14 @@ jQuery(function() {
                 }
             });
 
+        if (element.data('voted')) {
+            options.readOnly = true;
+        }
+
         if (options.readOnly) {
             element.addClass('disabled');
         }
+
         element.starRating(options);
     });
 });
