@@ -115,7 +115,7 @@ Everything else will get automatically calculated.
 stars(page.route, { options: { aggregate: { type: 'Blog', title: 'My Product } } })
 ```
 
-Assuming there's been **7** votes with the worst rating of **1** and best rating of **5** with a rating value of **2.5**, this will render as:
+Assuming there's been **7** votes with the worst rating of **1** and best rating of **5** with a rating value of **2.6**, this will render as:
 
 ```html
 <script type="application/ld+json">{ "@context": "http://schema.org/",
