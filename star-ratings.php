@@ -207,7 +207,7 @@ class StarRatingsPlugin extends Plugin
         $data = $this->getData($id, $options);
 
         if ($this->config->get('plugins.star-ratings.show_count')) {
-            $count_output = '<span class="star-count">('.$stars[1].' votes)</span>';
+            $count_output = '<span class="star-count">('.$data['count'].' votes)</span>';
         }
 
         if ($this->config->get('plugins.star-ratings.global_initialization', 0)) {
