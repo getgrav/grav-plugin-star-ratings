@@ -1,6 +1,8 @@
-# v1.1.0
+# v2.0.0
 ##  07/18/2017
 
+1. [](#new)
+    * Aggregated Rating (Rich Snippets) is now supported, for more details check the documentation [#6](https://github.com/getgrav/grav-plugin-star-ratings/issues/6)
 1. [](#improved)
     * Updated star-ratings-svg to latest version
     * Added `star_shape` option ('straight' [default], 'rounded')

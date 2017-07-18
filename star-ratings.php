@@ -201,7 +201,7 @@ class StarRatingsPlugin extends Plugin
      * @param array $options
      * @return string
      */
-    public function generateStars($id=null, $options = [])
+    public function generateStars($id = null, $options = [])
     {
         if ($id === null) {
             return '<i>ERROR: no id provided to <code>stars()</code> twig function</i>';
@@ -231,8 +231,26 @@ class StarRatingsPlugin extends Plugin
             }
         }
 
+        $aggregate_rating = '';
+        if ($this->config->get('plugins.star-ratings.aggregate_rating')) {
+            $title = isset($data['options']['aggregate']) && isset($data['options']['aggregate']['title']) ? $data['options']['aggregate']['title'] : $id;
+            $type = isset($data['options']['aggregate']) && isset($data['options']['aggregate']['type']) ? $data['options']['aggregate']['type'] : 'Product';
+
+            $aggregate_rating = '<script type="application/ld+json">{ "@context": "http://schema.org/",
+              "@type": "' . $type . '",
+              "name": "' . $title . '",
+              "aggregateRating":
+                {"@type": "AggregateRating",
+                 "ratingValue": "' . $data['score'] . '",
+                 "bestRating": "' . $this->config->get('plugins.star-ratings.total_stars') . '",
+                 "worstRating": "1",
+                 "ratingCount": "' . ($data['count'] ?: 1) . '"
+                }
+            }</script>';
+        }
+
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
-        return '<div class="star-ratings"><div class="star-rating-container" data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>';
+        return '<div class="star-ratings"><div class="star-rating-container" data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div>'. $score_output . $count_output . '</div>' . $aggregate_rating;
     }
 
     public function getData($id = null, $options = [])
