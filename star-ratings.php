@@ -105,7 +105,7 @@ class StarRatingsPlugin extends Plugin
             // try to add the vote
             $result = $this->addVote();
 
-            echo json_encode(['status' => $result[0], 'message' => $result[1], 'data' => ['score' => round($result[2][0], 1), 'count' => $result[2][1]]]);
+            echo json_encode(['status' => $result[0], 'message' => $result[1], 'data' => ['score' => $result[2][0], 'count' => $result[2][1]]]);
             exit();
         }
     }
@@ -350,7 +350,7 @@ class StarRatingsPlugin extends Plugin
         if (array_key_exists($id, $vote_data)) {
             $votes = $vote_data[$id];
             $count = count($votes);
-            $score = array_sum($votes) / $count;
+            $score = number_format(array_sum($votes) / $count, 1);
             return [$score, $count];
         } else {
             return [0, 0];
