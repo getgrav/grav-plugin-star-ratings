@@ -40,6 +40,10 @@ jQuery(function() {
             element.addClass('disabled');
         }
 
+        if (data.score) {
+            options.initialRating = data.score;
+        }
+
         element.starRating(options);
     });
 });
