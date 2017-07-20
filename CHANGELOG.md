@@ -1,6 +1,8 @@
 # v2.0.2
 ## xx/xx/2017
 
+1. [](#improved)
+    * Register `star-ratings` plugin to grav DI container
 1. [](#bugfix)
     * Fixed score rounding where it should always maintain 1 decimal place
     * Display tooltip indicating user has already voted

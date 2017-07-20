@@ -59,6 +59,8 @@ class StarRatingsPlugin extends Plugin
             'onTwigInitialized'     => ['onTwigInitialized', 0],
             'onTwigSiteVariables'   => ['onTwigSiteVariables', 0],
         ]);
+
+        $this->grav['star-ratings'] = $this;
     }
 
     private function initSetup()
@@ -349,7 +351,7 @@ class StarRatingsPlugin extends Plugin
         $fileInstance->save($this->vote_data);
     }
 
-    private function getStars($id)
+    public function getStars($id)
     {
         $vote_data = $this->getVoteData();
         if (array_key_exists($id, $vote_data)) {
