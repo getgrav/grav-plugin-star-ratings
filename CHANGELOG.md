@@ -3,6 +3,7 @@
 
 1. [](#improved)
     * Register `star-ratings` plugin to grav DI container
+    * Exposing "StarRatings" JS method for refreshing the stars
 1. [](#bugfix)
     * Fixed score rounding where it should always maintain 1 decimal place
     * Display tooltip indicating user has already voted
