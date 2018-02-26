@@ -47,5 +47,7 @@ jQuery(function() {
 
             element.starRating(options);
         });
-    }
+    };
+
+    window.StarRatings();
 });
