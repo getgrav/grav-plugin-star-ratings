@@ -37,6 +37,7 @@
 .star-rating-container {
     display: inline-block;
     vertical-align: middle;
+    white-space: nowrap;
 }
 
 .star-ratings .star-count {
@@ -77,7 +78,6 @@
     margin-bottom: 5px;
     margin-left: -80px;
     padding: 7px;
-    width: 160px;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
