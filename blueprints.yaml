@@ -60,7 +60,7 @@ form:
         type: bool
 
     initial_stars:
-      type: text
+      type: number
       size: x-small
       label: Initial stars
       help: You can populate the stars with an initial number when there are no votes
@@ -87,7 +87,7 @@ form:
           10: '10'
 
     star_size:
-      type: text
+      type: number
       size: x-small
       label: Star size
       help: The size in pixels fo the stars
