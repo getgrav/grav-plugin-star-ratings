@@ -94,7 +94,7 @@ form:
       append: px
       validate:
         type: number
-        min: 5
+        min: 1
 
     use_full_stars:
       type: toggle
