@@ -1,9 +1,10 @@
 # v2.0.2
-## xx/xx/2017
+## mm/dd/2023
 
 1. [](#improved)
     * Register `star-ratings` plugin to grav DI container
     * Exposing "StarRatings" JS method for refreshing the stars
+    * Removed a deprecation message for PHP 8.2+
 1. [](#bugfix)
     * Fixed score rounding where it should always maintain 1 decimal place
     * Display tooltip indicating user has already voted
