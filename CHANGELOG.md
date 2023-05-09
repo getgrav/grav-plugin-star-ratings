@@ -1,8 +1,20 @@
+# v2.0.2
+## 05/09/2023
+
+1. [](#improved)
+    * Register `star-ratings` plugin to grav DI container
+    * Exposing "StarRatings" JS method for refreshing the stars
+    * Removed a deprecation message for PHP 8.2+
+1. [](#bugfix)
+    * Fixed score rounding where it should always maintain 1 decimal place
+    * Display tooltip indicating user has already voted
+    * Fixed issue with initialScore when disabled
+
 # v2.0.1
 ## 07/18/2017
 
 1. [](#new)
-    * Added new option `vote_access` to prevent unhautorized users from voting
+    * Added new option `vote_access` to prevent unauthorized users from voting
 
 # v2.0.0
 ## 07/18/2017

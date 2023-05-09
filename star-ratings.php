@@ -59,6 +59,8 @@ class StarRatingsPlugin extends Plugin
             'onTwigInitialized'     => ['onTwigInitialized', 0],
             'onTwigSiteVariables'   => ['onTwigSiteVariables', 0],
         ]);
+
+        $this->grav['star-ratings'] = $this;
     }
 
     private function initSetup()
@@ -105,7 +107,7 @@ class StarRatingsPlugin extends Plugin
             // try to add the vote
             $result = $this->addVote();
 
-            echo json_encode(['status' => $result[0], 'message' => $result[1], 'data' => ['score' => round($result[2][0], 1), 'count' => $result[2][1]]]);
+            echo json_encode(['status' => $result[0], 'message' => $result[1], 'data' => ['score' => $result[2][0], 'count' => $result[2][1]]]);
             exit();
         }
     }
@@ -121,7 +123,7 @@ class StarRatingsPlugin extends Plugin
 
         // get and filter the data
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-        $id          = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_STRING);
+        $id          = isset($_POST['id']) ? htmlspecialchars(strip_tags($_POST['id']), ENT_QUOTES, 'UTF-8') : null;
 
         $data = $this->getStars($id);
 
@@ -255,6 +257,11 @@ class StarRatingsPlugin extends Plugin
         }
 
         $tooltip = isset($data['options']['loginRequired']) && $data['options']['loginRequired'] ? 'data-tooltip="' . $language->translate('PLUGIN_STAR_RATINGS.LOGIN_REQUIRED') . '"' : '';
+
+        if ($voted) {
+            $tooltip = 'data-tooltip="' . $language->translate('PLUGIN_STAR_RATINGS.VOTE_FAIL_IP') . '"';
+        }
+
         $data = htmlspecialchars(json_encode($data, ENT_QUOTES));
         return '<div class="star-ratings"><div class="star-rating-container" ' . $tooltip . ' data-voted="' . ($voted ? 'true' : 'false') . '" data-star-rating="'.$data.'"></div><div class="star-data-container">'. $score_output . $count_output . '</div></div>' . $aggregate_rating;
     }
@@ -344,13 +351,13 @@ class StarRatingsPlugin extends Plugin
         $fileInstance->save($this->vote_data);
     }
 
-    private function getStars($id)
+    public function getStars($id)
     {
         $vote_data = $this->getVoteData();
         if (array_key_exists($id, $vote_data)) {
             $votes = $vote_data[$id];
             $count = count($votes);
-            $score = array_sum($votes) / $count;
+            $score = number_format(array_sum($votes) / $count, 1);
             return [$score, $count];
         } else {
             return [0, 0];

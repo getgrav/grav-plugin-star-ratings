@@ -72,13 +72,13 @@ These values are merged with the defaults so you don't need to include everythin
 To use this plugin, you simplest way to output the stars is to use the Twig function and pass it a **Unique ID**:
 
 ```
-{{ stars(232) }}
+{{ stars(232)|raw }}
 ```
 
 This is using the hard-coded value of 232 as the unique ID.  You can however, use a dynamic value such as:
 
 ```
-{{ stars(page.route) }}
+{{ stars(page.route)|raw }}
 ```
 
 This will use the current page's route as the unique identifier.
@@ -105,7 +105,7 @@ So you can easily display just the score with: `{{ my_data.score }}`.
 You can also pass options to the `stars` function
 
 ```
-{{ stars(page.route, { options: { readOnly: true, starSize: 50 } }) }}
+{{ stars(page.route, { options: { readOnly: true, starSize: 50 } })|raw }}
 ```
 
 ### Aggregate Rating
@@ -120,7 +120,7 @@ star-ratings:
 Then from your twig file you can call the `stars` function
 
 ```
-stars(page.route)
+stars(page.route)|raw
 ```
 
 Aggregation supports 2 options to customize the rich snippet output:
@@ -131,7 +131,7 @@ Aggregation supports 2 options to customize the rich snippet output:
 Everything else will get automatically calculated. 
 
 ```
-stars(page.route, { options: { aggregate: { type: 'Blog', title: 'My Product } } })
+stars(page.route, { options: { aggregate: { type: 'Blog', title: 'My Product } } })|raw
 ```
 
 Assuming there's been **7** votes with the worst rating of **1** and best rating of **5** with a rating value of **2.6**, this will render as:
@@ -154,4 +154,4 @@ It is advised to use the Aggregate Rating for a single element per page, rather 
 
 ### NOTE:
 
-If you wish to use the `{{ stars(id) }}` Twig call in your page's content rather than in a Twig template, **you must disable page cache** ([see how to do this via page headers](https://learn.getgrav.org/content/headers#cache-enable)) or the stars value will be cached and will not sure an accurate representation of the state until the cache is cleared.
+If you wish to use the `{{ stars(id)|raw }}` Twig call in your page's content rather than in a Twig template, **you must disable page cache** ([see how to do this via page headers](https://learn.getgrav.org/content/headers#cache-enable)) or the stars value will be cached and will not sure an accurate representation of the state until the cache is cleared.
