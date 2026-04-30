@@ -1,5 +1,5 @@
 name: Star Ratings
-version: 2.0.2
+version: 2.0.3
 description: Simple but Powerful Star Ratings plugin for anything!
 icon: star-half-o
 author:
@@ -10,6 +10,9 @@ keywords: grav, plugin, etc
 bugs: https://github.com/getgrav/grav-plugin-star-ratings/issues
 docs: https://github.com/getgrav/grav-plugin-star-ratings/blob/develop/README.md
 license: MIT
+
+compatibility:
+  grav: ['1.7', '2.0']
 
 form:
   validation: strict

@@ -123,7 +123,7 @@ class StarRatingsPlugin extends Plugin
 
         // get and filter the data
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-        $id          = isset($_POST['id']) ? htmlspecialchars(strip_tags($_POST['id']), ENT_QUOTES, 'UTF-8') : null;
+        $id          = isset($_POST['id']) ? htmlspecialchars(strip_tags((string) $_POST['id']), ENT_QUOTES, 'UTF-8') : null;
 
         $data = $this->getStars($id);
 
