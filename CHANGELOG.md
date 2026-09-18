@@ -1,3 +1,10 @@
+# v2.0.4
+## 09/17/2026
+
+1. [](#bugfix)
+    * **[security] The `Vote Access` and `Read-only` settings are now enforced on the server.** Both were applied only by greying out the widget in the browser, so a vote sent straight to the plugin's callback was stored regardless — on a site restricted to logged-in voters, and on a site set to read-only. Thanks to @AlpetGexha
+    * **[security] A rating's security token is now tied to the specific item being rated, and the item id is length-checked.** One token worked for every item on the site. Ratings cached in a page, a CDN or a custom theme carry the old token, so clear your caches after updating or the first vote from a stale page will be refused. Thanks to @AlpetGexha
+
 # v2.0.3
 ## 04/30/2026
 

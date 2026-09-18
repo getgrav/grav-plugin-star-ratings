@@ -114,16 +114,32 @@ class StarRatingsPlugin extends Plugin
 
     public function addVote()
     {
+        $id = isset($_POST['id']) && is_string($_POST['id']) ? $_POST['id'] : null;
+        if ($id === null || strlen($id) > 255) {
+            return [false, 'Invalid rating id', [0, 0]];
+        }
+
         $nonce = $this->grav['uri']->param('nonce');
-        if (!Utils::verifyNonce($nonce, 'star-ratings')) {
+        if (!Utils::verifyNonce($nonce, 'star-ratings-' . $id)) {
             return [false, 'Invalid security nonce', [0, 0]];
         }
+        $id = htmlspecialchars(strip_tags($id), ENT_QUOTES, 'UTF-8');
 
         $language = $this->grav['language'];
 
+        // Both of these were enforced only by flags the widget's JavaScript reads,
+        // so a vote posted straight to the callback ignored them.
+        if ($this->config->get('plugins.star-ratings.readonly')) {
+            return [false, $language->translate('PLUGIN_STAR_RATINGS.VOTING_DISABLED'), [0, 0]];
+        }
+
+        $vote_access = $this->config->get('plugins.star-ratings.vote_access');
+        if ($vote_access && !$this->grav['user']->authorize($vote_access)) {
+            return [false, $language->translate('PLUGIN_STAR_RATINGS.LOGIN_REQUIRED'), [0, 0]];
+        }
+
         // get and filter the data
         $star_rating = filter_input(INPUT_POST, 'rating', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-        $id          = isset($_POST['id']) ? htmlspecialchars(strip_tags((string) $_POST['id']), ENT_QUOTES, 'UTF-8') : null;
 
         $data = $this->getStars($id);
 
@@ -275,7 +291,7 @@ class StarRatingsPlugin extends Plugin
             'id' => $id,
             'count' => $stars[1],
             'score' => $score,
-            'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json','star-ratings'),
+            'uri' => Uri::addNonce($this->grav['base_url'] . $this->config->get('plugins.star-ratings.callback') . '.json', 'star-ratings-' . (string) $id),
             'options' => [
                 'totalStars' => $this->config->get('plugins.star-ratings.total_stars'),
                 'initialRating' => $score,
